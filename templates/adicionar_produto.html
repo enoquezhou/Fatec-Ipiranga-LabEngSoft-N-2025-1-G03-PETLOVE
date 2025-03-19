@@ -1,0 +1,20 @@
+<h1>Adicionar Produto</h1>
+<form method="POST" enctype="multipart/form-data">
+  <label for="nome">Nome:</label>
+  <input type="text" name="nome" required><br>
+
+  <label for="descricao">Descrição:</label>
+  <textarea name="descricao"></textarea><br>
+
+  <label for="quantidade">Quantidade:</label>
+  <input type="number" name="quantidade" required><br>
+
+  <label for="preco">Preço:</label>
+  <input type="text" name="preco" required><br>
+
+  <!-- Campo para foto do produto -->
+  <label for="foto">Foto do Produto:</label>
+  <input type="file" name="foto" id="foto"><br><br>
+
+  <button type="submit">Adicionar</button>
+</form>

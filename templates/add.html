@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adicionar Novo Pet</title>
+</head>
+<body>
+    <h1>Adicionar Novo Pet</h1>
+    <form method="POST">
+        <label for="nome">Nome:</label>
+        <input type="text" id="nome" name="nome" required><br><br>
+
+        <label for="especie">Espécie:</label>
+        <input type="text" id="especie" name="especie" required><br><br>
+
+        <label for="idade">Idade:</label>
+        <input type="number" id="idade" name="idade" required><br><br>
+
+        <button type="submit">Adicionar Pet</button>
+    </form>
+    <br>
+    <a href="{{ url_for('index') }}">Voltar para a lista de pets</a>
+</body>
+</html>
