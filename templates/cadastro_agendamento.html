@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agendar Serviço</title>
+</head>
+<body>
+    <h1>Agendar Serviço</h1>
+    <form method="POST">
+        Pet: 
+        <select name="nome_pet" required>
+            {% for cliente in clientes %}
+                <optgroup label="{{ cliente.nome }}">
+                    {% for pet in cliente.pets %}
+                        <option value="{{ pet.id }}">{{ pet.nome }} ({{ pet.tipo }})</option>
+                    {% endfor %}
+                </optgroup>
+            {% endfor %}
+        </select><br>
+        
+        Serviço: 
+        <input type="text" name="servico" required><br>
+        
+        Data: 
+        <input type="text" name="data" required><br>
+        
+        Horário: 
+        <input type="text" name="horario" required><br>
+        
+        Prestador: 
+        <input type="text" name="prestador" required><br>
+        
+        Cliente:
+        <select name="cliente_id" required>
+            {% for cliente in clientes %}
+                <option value="{{ cliente.id }}">{{ cliente.nome }}</option>
+            {% endfor %}
+        </select><br>
+        
+        <button type="submit">Agendar</button>
+    </form>
+    <br>
+    <a href="{{ url_for('agendamentos') }}">Voltar</a>
+</body>
+</html>

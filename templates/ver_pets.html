@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciamento de Pet Shop</title>
+    <!-- Link para o Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Chilanka&family=Montserrat:wght@300&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --accent-color: #DEAD6F;
+            --dark-color: #222222;
+            --light-dark-color: #727272;
+            --light-color: #fff;
+            --grey-color: #dbdbdb;
+            --light-grey-color: #fafafa;
+            --primary-color: #6995B1;
+            --light-primary-color: #eef1f3;
+            --body-font: 'Chilanka', cursive;
+            --heading-font: 'Chilanka', cursive;
+            --secondary-font: 'Montserrat', sans-serif;
+        }
+
+        body {
+            font-family: var(--body-font);
+            background-color: var(--light-grey-color);
+            padding-bottom: 60px; /* Espaço para o rodapé fixo */
+        }
+
+        .bg-custom {
+            background-color: var(--light-color);
+        }
+
+        .navbar {
+            height: 120px;
+        }
+
+        .content-container {
+            padding: 1% 4%;
+        }
+
+        footer {
+            margin: 0;
+        }
+
+        .btn-primary, .btn-secondary {
+            background-color: var(--accent-color);
+            color: white;
+            font-weight: bold;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            animation: flash-text-blue 1s infinite;
+        }
+
+        .btn-secondary {
+            background-color: var(--grey-color);
+        }
+
+        /* Separar os botões */
+        .btn-container {
+            margin-bottom: 20px;
+        }
+
+        .btn-container .btn-secondary {
+            margin-left: 20px; /* Distância entre os botões */
+        }
+
+        /* Efeito de pisca-pisca no texto */
+        @keyframes flash-text-blue {
+            0%, 100% {
+                color: white; /* Cor inicial e final */
+            }
+            50% {
+                color: var(--accent-color); /* Azul no meio do ciclo */
+            }
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+
+    </style>
+</head>
+<body>
+
+<!-- Navbar com título e barra de pesquisa -->
+<nav class="navbar navbar-expand-lg bg-custom mb-4">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="http://127.0.0.1:5000/home_prestador">
+            <img src="{{ url_for('static', filename='images/LOGO.png') }}" alt="PetLove Logo" style="height: 80px; margin-left: 70px; width: 70%;">
+            <a style="font-size: 24px; color: #000000; text-decoration: none;">PETLOVE</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-5">
+                <li class="nav-item">
+                    <a href="{{ url_for('agendamentos') }}" class="nav-link {% if request.endpoint == 'agendamentos' %}active{% endif %} fs-4"><i class="fas fa-calendar-alt"></i> Agendamentos</a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('clientes') }}" class="nav-link {% if request.endpoint == 'clientes' %}active{% endif %} fs-4"><i class="fas fa-users"></i> Clientes</a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('pets') }}" class="nav-link {% if request.endpoint == 'pets' %}active{% endif %} fs-4"><i class="fas fa-paw"></i> Pets</a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('estoque') }}" class="nav-link {% if request.endpoint == 'estoque' %}active{% endif %} fs-4"><i class="fas fa-cogs"></i> Estoque</a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('financeiro') }}" class="nav-link {% if request.endpoint == 'financeiro' %}active{% endif %} fs-4"><i class="fas fa-hand-holding-usd"></i> Financeiro</a>
+                </li>
+            </ul>
+            <form class="d-flex ms-auto" role="search" method="GET" action="{{ url_for('financeiro') }}">
+                <input class="form-control me-2" type="search" placeholder="Pesquisar" aria-label="Pesquisar" name="search">
+                <button class="btn btn-outline-success" type="submit">
+                    <i class="fas fa-search"></i>
+                </button>
+            </form>
+ <!-- Botão de Logout -->
+ <ul class="navbar-nav ms-3">
+    {% if current_user.role == 'cliente' %}
+        <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Logout Cliente</a>
+        </li>
+    {% elif current_user.role == 'prestador' %}
+        <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Logout Prestador</a>
+        </li>
+    {% endif %}
+</ul>
+</div>
+</div>
+</nav>
+
+<!-- Conteúdo Principal -->
+<div class="container-fluid content-container">
+    <h1>Pets de {{ cliente.nome }}</h1>
+
+    <!-- Contêiner dos botões -->
+    <div class="btn-container">
+        <a href="{{ url_for('adicionar_pet', cliente_id=cliente.id) }}" class="btn btn-primary">Adicionar Pet</a>
+        <a href="{{ url_for('clientes') }}" class="btn btn-secondary">Voltar para a lista de clientes</a>
+    </div>
+
+    <h2>Lista de Pets</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>Idade</th>
+                <th>Sexo</th>
+                <th>Espécie</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if pets %}
+                {% for pet in pets %}
+                    <tr>
+                        <td>{{ pet.nome }}</td>
+                        <td>{{ pet.idade }}</td>
+                        <td>{{ pet.sexo }}</td>
+                        <td>{{ pet.especie }}</td>
+                        <td>
+                            <a href="{{ url_for('editar_pet', id=pet.id) }}" class="btn btn-warning btn-sm">
+                                <i class="fas fa-edit"></i> Editar
+                            </a>
+                            <form action="{{ url_for('remover_pet', id=pet.id) }}" method="POST" style="display:inline;">
+                                <button type="submit" class="btn btn-danger btn-sm">
+                                    <i class="fas fa-trash"></i> Remover
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="6">Este cliente não possui pets registrados.</td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+
+</div>
+
+<footer class="bg-dark text-white text-center py-3 fixed-bottom">
+    <p>© 2025 PetLove - Todos os direitos reservados</p>
+</footer>
+
+<!-- Scripts do Bootstrap -->
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
+
+</body>
+</html>

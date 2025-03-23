@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Pet</title>
+</head>
+<body>
+    <h1>Editar Pet</h1>
+    <form action="{{ url_for('editar_pet', id=pet.id) }}" method="POST" enctype="multipart/form-data">
+        <label for="nome">Nome do Pet:</label>
+        <input type="text" id="nome" name="nome" value="{{ pet.nome }}" required>
+        <br>
+        <label for="especie">Espécie:</label>
+        <input type="text" id="especie" name="especie" value="{{ pet.especie }}" required>
+        <br>
+        <label for="cliente_id">Cliente:</label>
+        <select id="cliente_id" name="cliente_id" required>
+            {% for cliente in clientes %}
+                <option value="{{ cliente.id }}" {% if cliente.id == pet.cliente_id %}selected{% endif %}>
+                    {{ cliente.nome }}
+                </option>
+            {% endfor %}
+        </select>
+        <br>
+        <!-- Campo para a foto do pet -->
+        <label for="foto">Foto do Pet:</label>
+        <input type="file" id="foto" name="foto">
+        <br>
+        <button type="submit">Salvar</button>
+    </form>
+</body>
+</html>

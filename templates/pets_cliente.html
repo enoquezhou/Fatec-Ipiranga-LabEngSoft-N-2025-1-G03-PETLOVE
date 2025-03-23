@@ -1,0 +1,25 @@
+<!-- templates/pets_cliente.html -->
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pets - {{ cliente.nome }} - Pet Shop</title>
+</head>
+<body>
+    <h1>Pets de {{ cliente.nome }}</h1>
+    <a href="{{ url_for('adicionar_pet', id=cliente.id) }}">Adicionar Pet</a>
+    <ul>
+        {% for pet in cliente.pets %}
+            <li>
+                {{ pet.nome }} - {{ pet.idade }} anos - {{ pet.sexo }} - {{ pet.especie }}
+                <a href="{{ url_for('editar_pet', id=pet.id) }}">Editar</a> |
+                <form action="{{ url_for('remover_pet', id=pet.id) }}" method="POST" style="display:inline;">
+                    <button type="submit">Remover</button>
+                </form>
+            </li>
+        {% endfor %}
+    </ul>
+    <a href="{{ url_for('clientes') }}">Voltar para a lista de clientes</a>
+</body>
+</html>

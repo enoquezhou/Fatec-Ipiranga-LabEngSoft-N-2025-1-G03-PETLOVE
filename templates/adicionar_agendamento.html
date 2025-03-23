@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agendar Serviço</title>
+</head>
+<body>
+    <h1>Agendar Serviço</h1>
+
+    <!-- Exibe mensagens de erro ou sucesso -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <ul>
+                {% for category, message in messages %}
+                    <li class="{{ category }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+
+    <form method="POST">
+        <label for="cliente_id">Nome do Cliente:</label>
+        <select id="cliente_id" name="cliente_id" required onchange="atualizarPets()">
+            <option value="">Selecione</option>
+            {% for cliente in clientes %}
+                <option value="{{ cliente.id }}">{{ cliente.nome }}</option>
+            {% endfor %}
+        </select><br><br>
+
+        <label for="pet_id">Nome do Pet:</label>
+        <select id="pet_id" name="pet_id" required onchange="atualizarEspecie()">
+            <option value="">Selecione</option>
+        </select><br><br>
+
+        <label for="especie">Espécie:</label>
+        <select id="especie" name="especie" required>
+            <option value="">Selecione</option>
+        </select><br><br>
+
+        <label for="servico">Serviço:</label>
+        <select id="servico" name="servico" required>
+            <option value="Banho">Banho</option>
+            <option value="Tosa">Tosa</option>
+        </select><br><br>
+
+        <label for="data">Data:</label>
+        <input type="date" id="data" name="data" required><br><br>
+
+        <label for="horario">Horário:</label>
+        <input type="time" id="horario" name="horario" required><br><br>
+
+        <label for="prestador">Prestador:</label>
+        <input type="text" id="prestador" name="prestador" required><br><br>
+
+        <!-- Novo campo para selecionar produtos -->
+        <label for="produtos">Produtos:</label>
+        <select id="produtos" name="produtos" multiple required>
+            <option value="">Selecione os produtos</option>
+            {% for produto in produtos %}
+                <option value="{{ produto.id }}" data-preco="{{ produto.preco }}">{{ produto.nome }} - R$ {{ produto.preco }}</option>
+            {% endfor %}
+        </select><br><br>
+
+        <!-- Contêiner para as quantidades dos produtos -->
+        <div id="quantidades-container">
+            <!-- As quantidades de cada produto serão adicionadas dinamicamente aqui -->
+        </div><br><br>
+
+        <button type="submit">Agendar</button>
+    </form>
+
+    <script>
+        // Função para atualizar os pets ao selecionar um cliente
+        function atualizarPets() {
+            var cliente_id = document.getElementById('cliente_id').value;
+            if (cliente_id) {
+                fetch(`/pets_por_cliente/${cliente_id}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const petSelect = document.getElementById('pet_id');
+                        petSelect.innerHTML = '<option value="">Selecione</option>';
+                        data.pets.forEach(pet => {
+                            const option = document.createElement('option');
+                            option.value = pet.id;
+                            option.textContent = pet.nome;
+                            petSelect.appendChild(option);
+                        });
+                    })
+                    .catch(() => alert('Erro ao carregar os pets.'));
+            } else {
+                document.getElementById('pet_id').innerHTML = '<option value="">Selecione</option>';
+            }
+        }
+
+        // Função para atualizar a espécie ao selecionar um pet
+        function atualizarEspecie() {
+            var pet_id = document.getElementById('pet_id').value;
+            const especieSelect = document.getElementById('especie');
+            if (pet_id) {
+                fetch(`/pet/${pet_id}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        especieSelect.innerHTML = `<option value="${data.especie}">${data.especie}</option>`;
+                    })
+                    .catch(() => alert('Erro ao carregar a espécie do pet.'));
+            } else {
+                especieSelect.innerHTML = '<option value="">Selecione</option>';
+            }
+        }
+
+        // Adiciona campos de quantidade dinamicamente conforme os produtos são selecionados
+        document.getElementById('produtos').addEventListener('change', function() {
+            const selectedOptions = Array.from(this.selectedOptions);
+            const quantidadesContainer = document.getElementById('quantidades-container');
+            
+            // Limpa os campos de quantidade anteriores
+            quantidadesContainer.innerHTML = '';
+
+            // Para cada produto selecionado, cria um campo de quantidade
+            selectedOptions.forEach(option => {
+                const produtoId = option.value;
+                const preco = parseFloat(option.dataset.preco);
+
+                const quantidadeInput = document.createElement('input');
+                quantidadeInput.type = 'number';
+                quantidadeInput.name = `quantidade_${produtoId}`;
+                quantidadeInput.min = 1;
+                quantidadeInput.value = 1;
+                quantidadeInput.required = true;
+                
+                const label = document.createElement('label');
+                label.textContent = `Quantidade de ${option.textContent}:`;
+
+                const quantidadeDiv = document.createElement('div');
+                quantidadeDiv.appendChild(label);
+                quantidadeDiv.appendChild(quantidadeInput);
+                quantidadesContainer.appendChild(quantidadeDiv);
+            });
+
+            // Atualiza o preço total com os novos valores
+            atualizarPrecoTotal();
+        });
+
+        // Função para calcular o preço total com base nos produtos selecionados e suas quantidades
+        function atualizarPrecoTotal() {
+            let totalPreco = 0;
+            const selectedOptions = Array.from(document.getElementById('produtos').selectedOptions);
+            selectedOptions.forEach(option => {
+                const preco = parseFloat(option.dataset.preco);
+                const produtoId = option.value;
+                const quantidade = parseInt(document.querySelector(`input[name="quantidade_${produtoId}"]`).value);
+                totalPreco += preco * quantidade;
+            });
+            
+            // Exibe o valor total dos produtos (pode ser exibido em algum lugar na tela)
+            console.log('Total preço dos produtos: R$' + totalPreco);
+        }
+    </script>
+</body>
+</html>

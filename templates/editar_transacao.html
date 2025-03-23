@@ -1,0 +1,16 @@
+<h1>Editar Transação</h1>
+<form method="POST">
+  <label for="tipo">Tipo:</label>
+  <select name="tipo" required>
+    <option value="Entrada" {% if transacao.tipo == 'Entrada' %}selected{% endif %}>Entrada</option>
+    <option value="Saída" {% if transacao.tipo == 'Saída' %}selected{% endif %}>Saída</option>
+  </select><br>
+
+  <label for="valor">Valor:</label>
+  <input type="number" step="0.01" name="valor" value="{{ transacao.valor }}" required><br>
+
+  <label for="descricao">Descrição:</label>
+  <textarea name="descricao">{{ transacao.descricao }}</textarea><br>
+
+  <button type="submit">Salvar Alterações</button>
+</form>
