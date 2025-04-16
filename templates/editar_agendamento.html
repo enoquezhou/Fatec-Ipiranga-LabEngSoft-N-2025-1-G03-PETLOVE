@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Agendamento</title>
+</head>
+<body>
+    <h1>Editar Agendamento</h1>
+
+    <!-- Mensagens de feedback -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <ul>
+                {% for category, message in messages %}
+                    <li class="{{ category }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+
+    <form method="POST">
+        <label for="cliente_id">Cliente:</label>
+        <select id="cliente_id" name="cliente_id" required onchange="atualizarPets()">
+            <option value="">Selecione</option>
+            {% for cliente in clientes %}
+                <option value="{{ cliente.id }}" {% if cliente.id == agendamento.cliente_id %}selected{% endif %}>{{ cliente.nome }}</option>
+            {% endfor %}
+        </select><br><br>
+
+        <label for="pet_id">Pet:</label>
+        <select id="pet_id" name="pet_id" required onchange="atualizarEspecie()">
+            <option value="">Selecione</option>
+            {% for pet in pets %}
+                <option value="{{ pet.id }}" {% if pet.id == agendamento.pet_id %}selected{% endif %}>{{ pet.nome }}</option>
+            {% endfor %}
+        </select><br><br>
+
+        <label for="especie">Espécie:</label>
+        <select id="especie" name="especie" required>
+            <option value="{{ agendamento.especie }}" selected>{{ agendamento.especie }}</option>
+        </select><br><br>
+
+        <label for="servico">Serviço:</label>
+        <select id="servico" name="servico" required>
+            <option value="Banho" {% if agendamento.servico == "Banho" %}selected{% endif %}>Banho</option>
+            <option value="Tosa" {% if agendamento.servico == "Tosa" %}selected{% endif %}>Tosa</option>
+        </select><br><br>
+
+        <label for="data">Data:</label>
+        <input type="date" id="data" name="data" value="{{ agendamento.data }}" required><br><br>
+
+        <label for="horario">Horário:</label>
+        <input type="time" id="horario" name="horario" value="{{ agendamento.horario.strftime('%H:%M') }}" required><br><br>
+
+        <label for="prestador">Prestador:</label>
+        <input type="text" id="prestador" name="prestador" value="{{ agendamento.prestador }}" required><br><br>
+
+        <label for="produtos">Produtos:</label>
+        <select id="produtos" name="produtos" multiple required>
+            {% for produto in produtos %}
+                <option value="{{ produto.id }}" {% if produto.id in produtos_agendados %}selected{% endif %}>{{ produto.nome }} - R$ {{ produto.preco }}</option>
+            {% endfor %}
+        </select><br><br>
+
+        <label for="quantidade">Quantidade:</label>
+        <input type="number" id="quantidade" name="quantidade" min="1" value="1" required><br><br>
+
+        <button type="submit">Salvar Alterações</button>
+    </form>
+
+    <script>
+        function atualizarPets() {
+            const cliente_id = document.getElementById('cliente_id').value;
+            fetch(`/pets_por_cliente/${cliente_id}`)
+                .then(response => response.json())
+                .then(data => {
+                    const petSelect = document.getElementById('pet_id');
+                    petSelect.innerHTML = '<option value="">Selecione</option>';
+                    data.pets.forEach(pet => {
+                        petSelect.innerHTML += `<option value="${pet.id}">${pet.nome}</option>`;
+                    });
+                });
+        }
+
+        function atualizarEspecie() {
+            const pet_id = document.getElementById('pet_id').value;
+            fetch(`/pet/${pet_id}`)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('especie').innerHTML = `<option value="${data.especie}">${data.especie}</option>`;
+                });
+        }
+    </script>
+</body>
+</html>

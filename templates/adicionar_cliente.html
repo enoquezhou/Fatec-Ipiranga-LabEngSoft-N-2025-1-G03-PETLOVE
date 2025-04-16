@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adicionar Cliente - Pet Shop</title>
+</head>
+<body>
+    <h1>Adicionar Cliente</h1>
+    <form action="{{ url_for('adicionar_cliente') }}" method="POST">
+        <label for="nome">Nome:</label>
+        <input type="text" id="nome" name="nome" required><br><br>
+
+        <label for="telefone">Telefone:</label>
+        <input type="text" id="telefone" name="telefone" required><br><br>
+
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required><br><br>
+
+        <button type="submit">Adicionar</button>
+    </form>
+    <a href="{{ url_for('clientes') }}">Voltar para a lista de clientes</a>
+</body>
+</html>
