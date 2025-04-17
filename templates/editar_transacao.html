@@ -1,16 +1,156 @@
-<h1>Editar Transação</h1>
-<form method="POST">
-  <label for="tipo">Tipo:</label>
-  <select name="tipo" required>
-    <option value="Entrada" {% if transacao.tipo == 'Entrada' %}selected{% endif %}>Entrada</option>
-    <option value="Saída" {% if transacao.tipo == 'Saída' %}selected{% endif %}>Saída</option>
-  </select><br>
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Editar Transação</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap"/>
+  <style>
+    /* Estilos globais */
+    * {
+      font-family: "Poppins", sans-serif;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-  <label for="valor">Valor:</label>
-  <input type="number" step="0.01" name="valor" value="{{ transacao.valor }}" required><br>
+    body {
+      background: url('/static/images/agendamentos_background.jpg') no-repeat center center fixed;
+      background-size: cover;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
 
-  <label for="descricao">Descrição:</label>
-  <textarea name="descricao">{{ transacao.descricao }}</textarea><br>
+    .container-editar-transacao {
+      background: rgba(0, 0, 0, 0.6);
+      color: white;
+      width: 100%;
+      max-width: 600px;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.5);
+    }
 
-  <button type="submit">Salvar Alterações</button>
-</form>
+    .editar-transacao-title {
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 24px;
+      font-weight: 600;
+    }
+
+    .label-box {
+      margin-bottom: 10px;
+      font-size: 14px;
+      color: white;
+    }
+
+    .input-box-editar-transacao {
+      position: relative;
+      margin-bottom: 20px;
+    }
+
+    .input-box-editar-transacao select,
+    .input-box-editar-transacao input,
+    .input-box-editar-transacao textarea {
+      width: 100%;
+      padding: 12px 15px;
+      border: none;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      outline: none;
+      font-size: 14px;
+      resize: none;
+    }
+
+    .input-box-editar-transacao select::placeholder,
+    .input-box-editar-transacao input::placeholder,
+    .input-box-editar-transacao textarea::placeholder {
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .editar-transacao-button {
+      width: 100%;
+      padding: 12px;
+      background-color: #DEAD6F;
+      color: white;
+      border: 2px solid #DEAD6F;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .editar-transacao-button:hover {
+      box-shadow:
+        rgba(222, 173, 111, 0.4) 5px 5px,
+        rgba(222, 173, 111, 0.3) 10px 10px,
+        rgba(222, 173, 111, 0.2) 15px 15px;
+    }
+
+    a.voltar-link {
+      color: white;
+      text-decoration: none;
+      display: block;
+      text-align: center;
+      margin-top: 15px;
+      transition: 0.3s;
+    }
+
+    a.voltar-link:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="container-editar-transacao">
+    <h1 class="editar-transacao-title">Editar Transação</h1>
+
+    <form method="POST" onsubmit="return validarFormulario()">
+      <div class="input-box-editar-transacao">
+        <label for="tipo" class="label-box">Tipo:</label>
+        <select name="tipo" id="tipo" required>
+          <option value="">Selecione o tipo</option>
+          <option value="Entrada">Entrada</option>
+          <option value="Saída">Saída</option>
+        </select>
+      </div>
+
+      <div class="input-box-editar-transacao">
+        <label for="valor" class="label-box">Valor:</label>
+        <input type="number" step="0.01" name="valor" id="valor" required placeholder="Digite o valor da transação">
+      </div>
+
+      <div class="input-box-editar-transacao">
+        <label for="descricao" class="label-box">Descrição:</label>
+        <textarea name="descricao" id="descricao" placeholder="Digite uma descrição"></textarea>
+      </div>
+
+      <button type="submit" class="editar-transacao-button">Salvar Alterações</button>
+    </form>
+
+    <a href="http://127.0.0.1:5000/financeiro" class="voltar-link">Voltar</a>
+  </div>
+
+  <script>
+    function validarFormulario() {
+      var tipo = document.getElementById("tipo").value;
+      if (tipo === "") {
+        alert("Por favor, selecione o tipo de transação.");
+        return false;
+      }
+
+      var valor = document.getElementById("valor").value;
+      if (valor === "" || valor <= 0) {
+        alert("Por favor, insira um valor válido para a transação.");
+        return false;
+      }
+
+      return true;
+    }
+  </script>
+</body>
+</html>

@@ -4,37 +4,136 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Adicionar Pet - {{ cliente.nome }}</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap">
+    <style>
+        /* Estilos globais */
+        * {
+            font-family: "Poppins", sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: url('/static/images/agendamentos_background.jpg') no-repeat center center fixed;
+            background-size: cover;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container-adicionar-pet {
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            width: 100%;
+            max-width: 600px;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .adicionar-pet-title {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .label-box {
+            margin-bottom: 10px;
+            font-size: 14px;
+            color: white;
+        }
+
+        .input-box-adicionar-pet {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .input-box-adicionar-pet select, 
+        .input-box-adicionar-pet input {
+            width: 100%;
+            padding: 12px 15px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            outline: none;
+            font-size: 14px;
+        }
+
+        .input-box-adicionar-pet select::placeholder,
+        .input-box-adicionar-pet input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .adicionar-pet-button {
+            width: 100%;
+            padding: 12px;
+            background-color: #DEAD6F; /* Cor de fundo */
+            color: white;
+            border: 2px solid #DEAD6F; /* Cor da borda */
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .adicionar-pet-button:hover {
+            box-shadow:
+                rgba(222, 173, 111, 0.4) 5px 5px,
+                rgba(222, 173, 111, 0.3) 10px 10px,
+                rgba(222, 173, 111, 0.2) 15px 15px;
+        }
+
+        select {
+            background-color: black;
+            color: white; /* Mantém o texto visível */
+        }
+    </style>
 </head>
 <body>
+    <div class="container-adicionar-pet">
+        <h1 class="adicionar-pet-title">Adicionar Pet para {{ cliente.nome }}</h1>
 
- <h1>Adicionar Pet para {{ cliente.nome }}</h1>
-    <form method="POST" enctype="multipart/form-data" onsubmit="return validarFormulario()">
-        <label for="nome">Nome:</label>
-        <input type="text" id="nome" name="nome" required pattern="[A-Za-z\s]+" title="Apenas letras e espaços são permitidos"><br><br>
+        <form method="POST" enctype="multipart/form-data" onsubmit="return validarFormulario()">
+            <div class="input-box-adicionar-pet">
+                <label for="nome" class="label-box">Nome:</label>
+                <input type="text" id="nome" name="nome" required pattern="[A-Za-z\s]+" title="Apenas letras e espaços são permitidos"><br><br>
+            </div>
 
-        <label for="idade">Idade:</label>
-        <input type="number" id="idade" name="idade" required min="0" title="Apenas números são permitidos"><br><br>
+            <div class="input-box-adicionar-pet">
+                <label for="idade" class="label-box">Idade:</label>
+                <input type="number" id="idade" name="idade" required min="0" title="Apenas números são permitidos"><br><br>
+            </div>
 
-        <label for="sexo">Sexo:</label>
-        <select id="sexo" name="sexo" required>
-            <option value="">Selecione o sexo</option>
-            <option value="Macho">Macho</option>
-            <option value="Fêmea">Fêmea</option>
-        </select><br><br>
+            <div class="input-box-adicionar-pet">
+                <label for="sexo" class="label-box">Sexo:</label>
+                <select id="sexo" name="sexo" required>
+                    <option value="">Selecione o sexo</option>
+                    <option value="Macho">Macho</option>
+                    <option value="Fêmea">Fêmea</option>
+                </select><br><br>
+            </div>
 
-        <label for="especie">Espécie:</label>
-        <input type="text" id="especie" name="especie" required pattern="[A-Za-z\s]+" title="Apenas letras e espaços são permitidos"><br><br>
+            <div class="input-box-adicionar-pet">
+                <label for="especie" class="label-box">Espécie:</label>
+                <input type="text" id="especie" name="especie" required pattern="[A-Za-z\s]+" title="Apenas letras e espaços são permitidos"><br><br>
+            </div>
 
-        <!-- Campo para foto do pet -->
-        <label for="foto">Foto do Pet:</label>
-        <input type="file" id="foto" name="foto" accept="image/*"><br><br>
+            <div class="input-box-adicionar-pet">
+                <label for="foto" class="label-box">Foto do Pet:</label>
+                <input type="file" id="foto" name="foto" accept="image/*"><br><br>
+            </div>
 
-        <button type="submit">Salvar</button>
-    </form>
+            <button type="submit" class="adicionar-pet-button">Salvar</button>
+        </form>
 
-
-    <br>
-    <a href="{{ url_for('ver_pets', cliente_id=cliente.id) }}">Voltar</a>
+        <br>
+        <a href="{{ url_for('ver_pets', cliente_id=cliente.id) }}" style="color: white; text-decoration: none;">Voltar</a>
+    </div>
 
     <script>
         function validarFormulario() {
@@ -69,6 +168,6 @@
             return true;
         }
     </script>
-    
+
 </body>
 </html>

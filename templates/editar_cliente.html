@@ -4,33 +4,144 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Editar Cliente</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap">
+    <style>
+        /* Estilos globais */
+        * {
+            font-family: "Poppins", sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: url('/static/images/agendamentos_background.jpg') no-repeat center center fixed;
+            background-size: cover;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container-edicao {
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            width: 100%;
+            max-width: 600px;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .edicao-title {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .label-box {
+            margin-bottom: 10px;
+            font-size: 14px;
+            color: white;
+            display: block;
+        }
+
+        .input-box-edicao {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .input-box-edicao input {
+            width: 100%;
+            padding: 12px 15px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            outline: none;
+            font-size: 14px;
+        }
+
+        .input-box-edicao input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .edicao-button {
+            width: 100%;
+            padding: 12px;
+            background-color: #DEAD6F;
+            color: white;
+            border: 2px solid #DEAD6F;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .edicao-button:hover {
+            box-shadow:
+                rgba(222, 173, 111, 0.4) 5px 5px,
+                rgba(222, 173, 111, 0.3) 10px 10px,
+                rgba(222, 173, 111, 0.2) 15px 15px;
+        }
+
+        ul {
+            margin-bottom: 20px;
+            list-style: none;
+            padding: 0;
+            text-align: center;
+        }
+
+        li {
+            margin-bottom: 5px;
+            padding: 8px;
+            border-radius: 5px;
+        }
+
+        .error {
+            background-color: #ff4c4c;
+        }
+
+        .success {
+            background-color: #4caf50;
+        }
+    </style>
 </head>
 <body>
-    <h1>Editar Cliente</h1>
+    <div class="container-edicao">
+        <h1 class="edicao-title">Editar Cliente</h1>
 
-    <!-- Exibe mensagens de erro ou sucesso -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            <ul>
-                {% for category, message in messages %}
-                    <li class="{{ category }}">{{ message }}</li>
-                {% endfor %}
-            </ul>
-        {% endif %}
-    {% endwith %}
+        <!-- Exibe mensagens de erro ou sucesso -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <ul>
+                    {% for category, message in messages %}
+                        <li class="{{ category }}">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
 
-    <form method="POST">
-        <label for="nome">Nome:</label>
-        <input type="text" id="nome" name="nome" value="{{ cliente.nome }}" required><br><br>
+        <form method="POST">
+            <div class="input-box-edicao">
+                <label for="nome" class="label-box">Nome:</label>
+                <input type="text" id="nome" name="nome" value="{{ cliente.nome }}" required>
+            </div>
 
-        <label for="telefone">Telefone:</label>
-        <input type="text" id="telefone" name="telefone" value="{{ cliente.telefone }}" required><br><br>
+            <div class="input-box-edicao">
+                <label for="telefone" class="label-box">Telefone:</label>
+                <input type="text" id="telefone" name="telefone" value="{{ cliente.telefone }}" required>
+            </div>
 
-        <label for="email">Email:</label>
-        <input type="email" id="email" name="email" value="{{ cliente.email }}" required><br><br>
+            <div class="input-box-edicao">
+                <label for="email" class="label-box">Email:</label>
+                <input type="email" id="email" name="email" value="{{ cliente.email }}" required>
+            </div>
 
-        <button type="submit">Salvar Alterações</button>
-    </form>
-
+            <button type="submit" class="edicao-button">Salvar Alterações</button>
+        </form>
+    </div>
 </body>
 </html>
