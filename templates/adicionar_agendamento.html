@@ -4,71 +4,187 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Agendar Serviço</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap">
+    <style>
+        /* Estilos globais */
+        * {
+            font-family: "Poppins", sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: url('/static/images/agendamentos_background.jpg') no-repeat center center fixed;
+            background-size: cover;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container-agendamento {
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            width: 100%;
+            max-width: 600px;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .agendamento-title {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .label-box {
+            margin-bottom: 10px;
+            font-size: 14px;
+            color: white;
+        }
+
+        .input-box-agendamento {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .input-box-agendamento select, 
+        .input-box-agendamento input {
+            width: 100%;
+            padding: 12px 15px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            outline: none;
+            font-size: 14px;
+        }
+
+        .input-box-agendamento select::placeholder,
+        .input-box-agendamento input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .agendamento-button {
+            width: 100%;
+            padding: 12px;
+            background-color: #DEAD6F; /* Cor de fundo */
+            color: white;
+            border: 2px solid #DEAD6F; /* Cor da borda */
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .agendamento-button:hover {
+            box-shadow:
+                rgba(222, 173, 111, 0.4) 5px 5px,
+                rgba(222, 173, 111, 0.3) 10px 10px,
+                rgba(222, 173, 111, 0.2) 15px 15px;
+        }
+
+        .flashes {
+            list-style: none;
+            margin-top: 15px;
+            padding: 0;
+        }
+
+        .flashes li {
+            background-color: #28a745; /* Verde */
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+        select {
+            background-color: black;
+            color: white; /* Mantém o texto visível */
+        }
+    </style>
 </head>
 <body>
-    <h1>Agendar Serviço</h1>
+    <div class="container-agendamento">
+        <h1 class="agendamento-title">Agendar Serviço</h1>
 
-    <!-- Exibe mensagens de erro ou sucesso -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            <ul>
-                {% for category, message in messages %}
-                    <li class="{{ category }}">{{ message }}</li>
-                {% endfor %}
-            </ul>
-        {% endif %}
-    {% endwith %}
+        <!-- Exibe mensagens de erro ou sucesso -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <ul class="flashes">
+                    {% for category, message in messages %}
+                        <li class="{{ category }}">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
 
-    <form method="POST">
-        <label for="cliente_id">Nome do Cliente:</label>
-        <select id="cliente_id" name="cliente_id" required onchange="atualizarPets()">
-            <option value="">Selecione</option>
-            {% for cliente in clientes %}
-                <option value="{{ cliente.id }}">{{ cliente.nome }}</option>
-            {% endfor %}
-        </select><br><br>
+        <form method="POST">
+            <div class="input-box-agendamento">
+                <label for="cliente_id" class="label-box">Nome do Cliente:</label>
+                <select id="cliente_id" name="cliente_id" required onchange="atualizarPets()">
+                    <option value="">Selecione</option>
+                    {% for cliente in clientes %}
+                        <option value="{{ cliente.id }}">{{ cliente.nome }}</option>
+                    {% endfor %}
+                </select>
+            </div>
 
-        <label for="pet_id">Nome do Pet:</label>
-        <select id="pet_id" name="pet_id" required onchange="atualizarEspecie()">
-            <option value="">Selecione</option>
-        </select><br><br>
+            <div class="input-box-agendamento">
+                <label for="pet_id" class="label-box">Nome do Pet:</label>
+                <select id="pet_id" name="pet_id" required onchange="atualizarEspecie()">
+                    <option value="">Selecione</option>
+                </select>
+            </div>
 
-        <label for="especie">Espécie:</label>
-        <select id="especie" name="especie" required>
-            <option value="">Selecione</option>
-        </select><br><br>
+            <div class="input-box-agendamento">
+                <label for="especie" class="label-box">Espécie:</label>
+                <select id="especie" name="especie" required>
+                    <option value="">Selecione</option>
+                </select>
+            </div>
 
-        <label for="servico">Serviço:</label>
-        <select id="servico" name="servico" required>
-            <option value="Banho">Banho</option>
-            <option value="Tosa">Tosa</option>
-        </select><br><br>
+            <div class="input-box-agendamento">
+                <label for="servico" class="label-box">Serviço:</label>
+                <select id="servico" name="servico" required>
+                    <option value="Banho">Banho</option>
+                    <option value="Tosa">Tosa</option>
+                </select>
+            </div>
 
-        <label for="data">Data:</label>
-        <input type="date" id="data" name="data" required><br><br>
+            <div class="input-box-agendamento">
+                <label for="data" class="label-box">Data:</label>
+                <input type="date" id="data" name="data" required>
+            </div>
 
-        <label for="horario">Horário:</label>
-        <input type="time" id="horario" name="horario" required><br><br>
+            <div class="input-box-agendamento">
+                <label for="horario" class="label-box">Horário:</label>
+                <input type="time" id="horario" name="horario" required>
+            </div>
 
-        <label for="prestador">Prestador:</label>
-        <input type="text" id="prestador" name="prestador" required><br><br>
+            <div class="input-box-agendamento">
+                <label for="prestador" class="label-box">Prestador:</label>
+                <input type="text" id="prestador" name="prestador" required>
+            </div>
 
-        <!-- Novo campo para selecionar produtos -->
-        <label for="produtos">Produtos:</label>
-        <select id="produtos" name="produtos" multiple required>
-            <option value="">Selecione os produtos</option>
-            {% for produto in produtos %}
-                <option value="{{ produto.id }}" data-preco="{{ produto.preco }}">{{ produto.nome }} - R$ {{ produto.preco }}</option>
-            {% endfor %}
-        </select><br><br>
+            <div class="input-box-agendamento">
+                <label for="produtos" class="label-box">Produtos:</label>
+                <select id="produtos" name="produtos" multiple required>
+                    <option value="">Selecione os produtos</option>
+                    {% for produto in produtos %}
+                        <option value="{{ produto.id }}" data-preco="{{ produto.preco }}">{{ produto.nome }} - R$ {{ produto.preco }}</option>
+                    {% endfor %}
+                </select>
+            </div>
 
-        <!-- Contêiner para as quantidades dos produtos -->
-        <div id="quantidades-container">
-            <!-- As quantidades de cada produto serão adicionadas dinamicamente aqui -->
-        </div><br><br>
+            <div id="quantidades-container"></div><br>
 
-        <button type="submit">Agendar</button>
-    </form>
+            <button type="submit" class="agendamento-button">Agendar</button>
+        </form>
+    </div>
 
     <script>
         // Função para atualizar os pets ao selecionar um cliente
@@ -130,32 +246,13 @@
                 quantidadeInput.required = true;
                 
                 const label = document.createElement('label');
-                label.textContent = `Quantidade de ${option.textContent}:`;
-
-                const quantidadeDiv = document.createElement('div');
-                quantidadeDiv.appendChild(label);
-                quantidadeDiv.appendChild(quantidadeInput);
-                quantidadesContainer.appendChild(quantidadeDiv);
+                label.textContent = `Quantidade de ${option.textContent}: `;
+                
+                quantidadesContainer.appendChild(label);
+                quantidadesContainer.appendChild(quantidadeInput);
+                quantidadesContainer.appendChild(document.createElement('br'));
             });
-
-            // Atualiza o preço total com os novos valores
-            atualizarPrecoTotal();
         });
-
-        // Função para calcular o preço total com base nos produtos selecionados e suas quantidades
-        function atualizarPrecoTotal() {
-            let totalPreco = 0;
-            const selectedOptions = Array.from(document.getElementById('produtos').selectedOptions);
-            selectedOptions.forEach(option => {
-                const preco = parseFloat(option.dataset.preco);
-                const produtoId = option.value;
-                const quantidade = parseInt(document.querySelector(`input[name="quantidade_${produtoId}"]`).value);
-                totalPreco += preco * quantidade;
-            });
-            
-            // Exibe o valor total dos produtos (pode ser exibido em algum lugar na tela)
-            console.log('Total preço dos produtos: R$' + totalPreco);
-        }
     </script>
 </body>
 </html>

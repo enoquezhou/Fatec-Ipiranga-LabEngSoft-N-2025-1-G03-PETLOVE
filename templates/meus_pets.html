@@ -183,17 +183,21 @@
     </div>
 </nav>
 
-    <h1 class="text-center my-4">Meus Pets</h1>
+    <div class="container mt-5">
+        <h1>Meus Pets</h1>
+        <div class="btn-container">
+            <a href="{{ url_for('adicionar_pet', cliente_id=cliente.id) }}" class="btn btn-primary my-3 text-flash-blue">
+                Adicionar Pet
+            </a>
+        </div>
+    </div>
 
-    <a href="{{ url_for('adicionar_pet', cliente_id=cliente.id) }}" class="btn btn-primary my-3 text-flash-blue">
-        Adicionar Pet
-    </a>    
 
     {% if pets %}
     <div class="container-fluid content-container">
         <div class="row">
             {% for pet in pets %}
-            <div class="col-md-3 mb-4">
+            <div class="col-md-3 mb-4">1
                 <div class="card">
                     <div class="card-body d-flex">
                         <div class="text-container">

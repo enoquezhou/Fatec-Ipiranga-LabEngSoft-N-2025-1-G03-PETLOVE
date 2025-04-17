@@ -4,30 +4,129 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Editar Pet</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap">
+    <style>
+        /* Estilos globais */
+        * {
+            font-family: "Poppins", sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: url('/static/images/agendamentos_background.jpg') no-repeat center center fixed;
+            background-size: cover;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container-edicao {
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            width: 100%;
+            max-width: 600px;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .edicao-title {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .label-box {
+            margin-bottom: 10px;
+            font-size: 14px;
+            color: white;
+        }
+
+        .input-box-edicao {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .input-box-edicao select, 
+        .input-box-edicao input {
+            width: 100%;
+            padding: 12px 15px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            outline: none;
+            font-size: 14px;
+        }
+
+        .input-box-edicao select::placeholder,
+        .input-box-edicao input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .edicao-button {
+            width: 100%;
+            padding: 12px;
+            background-color: #DEAD6F; /* Cor de fundo */
+            color: white;
+            border: 2px solid #DEAD6F; /* Cor da borda */
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .edicao-button:hover {
+            box-shadow:
+                rgba(222, 173, 111, 0.4) 5px 5px,
+                rgba(222, 173, 111, 0.3) 10px 10px,
+                rgba(222, 173, 111, 0.2) 15px 15px;
+        }
+
+        select {
+            background-color: black;
+            color: white; /* Mantém o texto visível */
+        }
+    </style>
 </head>
 <body>
-    <h1>Editar Pet</h1>
-    <form action="{{ url_for('editar_pet', id=pet.id) }}" method="POST" enctype="multipart/form-data">
-        <label for="nome">Nome do Pet:</label>
-        <input type="text" id="nome" name="nome" value="{{ pet.nome }}" required>
-        <br>
-        <label for="especie">Espécie:</label>
-        <input type="text" id="especie" name="especie" value="{{ pet.especie }}" required>
-        <br>
-        <label for="cliente_id">Cliente:</label>
-        <select id="cliente_id" name="cliente_id" required>
-            {% for cliente in clientes %}
-                <option value="{{ cliente.id }}" {% if cliente.id == pet.cliente_id %}selected{% endif %}>
-                    {{ cliente.nome }}
-                </option>
-            {% endfor %}
-        </select>
-        <br>
-        <!-- Campo para a foto do pet -->
-        <label for="foto">Foto do Pet:</label>
-        <input type="file" id="foto" name="foto">
-        <br>
-        <button type="submit">Salvar</button>
-    </form>
+    <div class="container-edicao">
+        <h1 class="edicao-title">Editar Pet</h1>
+
+        <form action="{{ url_for('editar_pet', id=pet.id) }}" method="POST" enctype="multipart/form-data">
+            <div class="input-box-edicao">
+                <label for="nome" class="label-box">Nome do Pet:</label>
+                <input type="text" id="nome" name="nome" value="{{ pet.nome }}" required>
+            </div>
+
+            <div class="input-box-edicao">
+                <label for="especie" class="label-box">Espécie:</label>
+                <input type="text" id="especie" name="especie" value="{{ pet.especie }}" required>
+            </div>
+
+            <div class="input-box-edicao">
+                <label for="cliente_id" class="label-box">Cliente:</label>
+                <select id="cliente_id" name="cliente_id" required>
+                    {% for cliente in clientes %}
+                        <option value="{{ cliente.id }}" {% if cliente.id == pet.cliente_id %}selected{% endif %}>
+                            {{ cliente.nome }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="input-box-edicao">
+                <label for="foto" class="label-box">Foto do Pet:</label>
+                <input type="file" id="foto" name="foto">
+            </div>
+
+            <button type="submit" class="edicao-button">Salvar</button>
+        </form>
+    </div>
 </body>
 </html>

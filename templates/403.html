@@ -8,7 +8,6 @@
 <body>
     <h1>403 - Acesso Negado</h1>
     <p>Você não tem permissão para acessar esta página.</p>
-    <!-- Verifica o papel do usuário para redirecionar corretamente -->
     {% if current_user.role == 'cliente' %}
         <a href="{{ url_for('home_cliente') }}">Voltar para a página inicial (Cliente)</a>
     {% else %}
