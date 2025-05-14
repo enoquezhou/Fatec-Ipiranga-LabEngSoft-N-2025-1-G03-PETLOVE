@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pets - Gerenciamento de Pet Shop</title>
-    <!-- Link para o Bootstrap -->
+    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Chilanka&family=Montserrat:wght@300&display=swap" rel="stylesheet">
@@ -26,7 +26,7 @@
         body {
             font-family: var(--body-font);
             background-color: var(--light-grey-color);
-            padding-bottom: 60px; /* Espaço para o rodapé fixo */
+            padding-bottom: 60px;
         }
 
         .bg-custom {
@@ -61,17 +61,13 @@
             color: var(--light-dark-color);
         }
 
-        footer {
-            margin: 0;
-        }
-
         .btn-primary {
             background-color: var(--accent-color);
             color: white;
             font-weight: bold;
             border: none;
-            padding: 15px 30px; /* Aumenta o tamanho do botão */
-            font-size: 1.2rem; /* Aumenta o tamanho da fonte do botão */
+            padding: 15px 30px;
+            font-size: 1.2rem;
         }
 
         .text-flash-blue {
@@ -79,15 +75,10 @@
         }
 
         @keyframes flash-text-blue {
-            0%, 100% {
-                color: white; /* Cor inicial e final */
-            }
-            50% {
-                color: var(--accent-color); /* Azul no meio do ciclo */
-            }
+            0%, 100% { color: white; }
+            50% { color: var(--accent-color); }
         }
 
-        /* Estilos adicionais para o card com imagem */
         .card-body {
             display: flex;
             justify-content: space-between;
@@ -118,97 +109,63 @@
 </head>
 <body>
 
-<!-- Navbar com título e barra de pesquisa -->
+<!-- Navbar -->
 <nav class="navbar navbar-expand-lg bg-custom mb-4">
     <div class="container-fluid">
-        <a class="navbar-brand" href="http://127.0.0.1:5000/home_prestador">
-            <img src="{{ url_for('static', filename='images/LOGO.png') }}" alt="PetLove Logo" style="height: 80px; margin-left: 70px; width: 70%;">
-            <a style="font-size: 24px; color: #000000; text-decoration: none;">PETLOVE</a>
+        <a class="navbar-brand d-flex align-items-center" href="http://127.0.0.1:5000/home_prestador" style="margin-left: 30px;">
+            <img src="{{ url_for('static', filename='images/LOGO.png') }}" alt="PetLove Logo" style="height: 70px; margin-right: 10px;">
+            <span style="font-size: 24px; color: #000000;">PETLOVE</span>
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ms-5">
-                <li class="nav-item">
-                    <a href="{{ url_for('agendamentos') }}" class="nav-link {% if request.endpoint == 'agendamentos' %}active{% endif %} fs-4">
-                        <i class="fas fa-calendar-alt"></i> Agendamentos
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="{{ url_for('clientes') }}" class="nav-link {% if request.endpoint == 'clientes' %}active{% endif %} fs-4">
-                        <i class="fas fa-users"></i> Clientes
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="{{ url_for('pets') }}" class="nav-link {% if request.endpoint == 'pets' %}active{% endif %} fs-4">
-                        <i class="fas fa-paw"></i> Pets
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="{{ url_for('estoque') }}" class="nav-link {% if request.endpoint == 'estoque' %}active{% endif %} fs-4">
-                        <i class="fas fa-cogs"></i> Estoque
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="{{ url_for('financeiro') }}" class="nav-link {% if request.endpoint == 'financeiro' %}active{% endif %} fs-4">
-                        <i class="fas fa-hand-holding-usd"></i> Financeiro
-                    </a>
-                </li>
+            <ul class="navbar-nav ms-5 me-auto mb-2 mb-lg-0">
+                <li class="nav-item"><a href="{{ url_for('agendamentos') }}" class="nav-link {% if request.endpoint == 'agendamentos' %}active fw-bold text-dark{% endif %} fs-4"><i class="fas fa-calendar-alt"></i> Agendamentos</a></li>
+                <li class="nav-item"><a href="{{ url_for('clientes') }}" class="nav-link {% if request.endpoint == 'clientes' %}active fw-bold text-dark{% endif %} fs-4"><i class="fas fa-users"></i> Clientes</a></li>
+                <li class="nav-item"><a href="{{ url_for('pets') }}" class="nav-link {% if request.endpoint == 'pets' %}active fw-bold text-dark{% endif %} fs-4"><i class="fas fa-paw"></i> Pets</a></li>
+                <li class="nav-item"><a href="{{ url_for('estoque') }}" class="nav-link {% if request.endpoint == 'estoque' %}active fw-bold text-dark{% endif %} fs-4"><i class="fas fa-cogs"></i> Estoque</a></li>
+                <li class="nav-item"><a href="{{ url_for('financeiro') }}" class="nav-link {% if request.endpoint == 'financeiro' %}active fw-bold text-dark{% endif %} fs-4"><i class="fas fa-hand-holding-usd"></i> Financeiro</a></li>
             </ul>
-            <form class="d-flex ms-auto" role="search" method="GET" action="{{ url_for('pets') }}">
-                <input class="form-control me-2" type="search" placeholder="Pesquisar" aria-label="Pesquisar" name="search">
-                <button class="btn btn-outline-success" type="submit">
-                    <i class="fas fa-search"></i>
-                </button>
+
+            <form class="d-flex me-3" onsubmit="filterCards(event)" role="search">
+                <input id="searchInput" class="form-control me-2" type="search" placeholder="Pesquisar Pet" aria-label="Pesquisar">
+                <button class="btn btn-outline-success" type="submit"><i class="fas fa-search"></i></button>
             </form>
-         <!-- Botão de Logout -->
-         <ul class="navbar-nav ms-3">
-            {% if current_user.role == 'cliente' %}
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Logout Cliente</a>
-                </li>
-            {% elif current_user.role == 'prestador' %}
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Logout Prestador</a>
-                </li>
-            {% endif %}
-        </ul>
+
+            <ul class="navbar-nav">
+                {% if current_user.role == 'cliente' %}
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Logout Cliente</a></li>
+                {% elif current_user.role == 'prestador' %}
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Logout Prestador</a></li>
+                {% endif %}
+            </ul>
+        </div>
     </div>
-</div>
 </nav>
 
 <!-- Conteúdo Principal -->
 <div class="container-fluid content-container">
-    <!-- Botão com animação de pisca-pisca no texto -->
-    <a href="{{ url_for('adicionar_pet', cliente_id=cliente.id) }}" class="btn btn-primary my-3 text-flash-blue">
-        Adicionar Pet
-    </a>    
-
-    <div class="row">
+    <a href="{{ url_for('adicionar_pet', cliente_id=cliente.id) }}" class="btn btn-primary my-3 text-flash-blue">Adicionar Pet</a>
+    <div class="row" id="petCardsContainer">
         {% for pet in pets %}
-        <div class="col-md-3 mb-4">
+        <div class="col-md-3 mb-4 pet-card">
             <div class="card">
                 <div class="card-body d-flex">
                     <div class="text-container">
                         <h5 class="card-title">{{ pet.nome }}</h5>
                         <p class="card-text">Espécie: {{ pet.especie }}</p>
                         <p class="card-text">Cliente: {{ pet.cliente.nome }}</p>
-                        <a href="{{ url_for('editar_pet', id=pet.id) }}" class="btn btn-warning btn-sm">
-                            <i class="fas fa-edit"></i> Editar
-                        </a>
+                        <a href="{{ url_for('editar_pet', id=pet.id) }}" class="btn btn-warning btn-sm"><i class="fas fa-edit"></i> Editar</a>
                         <form action="{{ url_for('remover_pet', id=pet.id) }}" method="POST" style="display:inline;">
-                            <button type="submit" class="btn btn-danger btn-sm">
-                                <i class="fas fa-trash"></i> Remover
-                            </button>
+                            <button type="submit" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i> Remover</button>
                         </form>
                     </div>
                     <div class="image-container ms-3">
-                        <!-- Exibindo a foto do pet -->
                         {% if pet.foto %}
-                            <img src="{{ url_for('static', filename='uploads/' + pet.foto) }}" alt="Foto do Pet">
+                        <img src="{{ url_for('static', filename='uploads/' + pet.foto) }}" alt="Foto do Pet">
                         {% else %}
-                            <img src="{{ url_for('static', filename='images/default-pet.jpg') }}" alt="Foto do Pet">
+                        <img src="{{ url_for('static', filename='images/default-pet.jpg') }}" alt="Foto do Pet">
                         {% endif %}
                     </div>
                 </div>
@@ -222,71 +179,19 @@
     <p>© 2025 PetLove - Todos os direitos reservados</p>
 </footer>
 
-<!-- Scripts do Bootstrap -->
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
+<!-- Scripts -->
 <script>
-    let isDragging = false;
-    let startX = 0;
-    let currentX = 0;
-    const navbarLinks = document.querySelectorAll('#navbarNav .nav-item');
-    let currentPageIndex = 0;  // Inicializa como 0, que corresponde ao primeiro item
-
-    // Atualiza o índice atual com base na página carregada
-    function updateCurrentPageIndex() {
-        navbarLinks.forEach((link, index) => {
-            if (link.querySelector('a').classList.contains('active')) {
-                currentPageIndex = index; // Atualiza o índice para a página ativa
-            }
+    function filterCards(event) {
+        event.preventDefault();
+        const input = document.getElementById('searchInput').value.toLowerCase();
+        const cards = document.querySelectorAll('.pet-card');
+        cards.forEach(card => {
+            const text = card.innerText.toLowerCase();
+            card.style.display = text.includes(input) ? '' : 'none';
         });
     }
-
-    // Chama a função para definir o índice atual ao carregar a página
-    updateCurrentPageIndex();
-
-    // Monitorando o movimento de arraste
-    const container = document.body;
-
-    container.addEventListener('mousedown', (e) => {
-        isDragging = true;
-        startX = e.pageX;
-    });
-
-    container.addEventListener('mousemove', (e) => {
-        if (isDragging) {
-            currentX = e.pageX;
-            const distance = startX - currentX;
-
-            // Se arrastado para a esquerda (indicando a página anterior)
-            if (distance > 100) {
-                navigateToPage(currentPageIndex + 1);  // Próxima página
-                isDragging = false; // Impede múltiplas navegações
-            }
-            // Se arrastado para a direita (indicando a próxima página)
-            else if (distance < -100) {
-                navigateToPage(currentPageIndex - 1);  // Página anterior
-                isDragging = false; // Impede múltiplas navegações
-            }
-        }
-    });
-
-    container.addEventListener('mouseup', () => {
-        isDragging = false;
-    });
-
-    container.addEventListener('mouseleave', () => {
-        isDragging = false;
-    });
-
-    // Função para navegar entre as páginas
-    function navigateToPage(index) {
-        // Verificar se o índice está dentro dos limites
-        if (index >= 0 && index < navbarLinks.length) {
-            const nextPage = navbarLinks[index];
-            window.location.href = nextPage.querySelector('a').href;
-            currentPageIndex = index; // Atualiza o índice atual
-        }
-    }
 </script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
 </body>
 </html>

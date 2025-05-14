@@ -105,9 +105,9 @@
             </ul>
 
             <!-- Barra de pesquisa com ícone de lupa -->
-            <form class="d-flex ms-auto" role="search">
-                <input class="form-control me-2" type="search" placeholder="Pesquisar" aria-label="Search">
-                <button class="btn btn-outline-success" type="submit">
+            <form id="searchForm" class="d-flex ms-auto" role="search">
+                <input id="searchInput" class="form-control me-2" type="search" placeholder="Pesquisar Cliente" aria-label="Search">
+                <button id="searchBtn" class="btn btn-outline-success" type="button">
                     <i class="fas fa-search"></i> <!-- Ícone de lupa -->
                 </button>
             </form>
@@ -138,24 +138,20 @@
 
     <!-- Seção de Clientes -->
     <h3 class="my-4">Clientes Cadastrados</h3>
-    <div class="row">
+    <div id="clientesContainer" class="row">
         {% for usuario in usuarios_cliente %}
-        <div class="col-md-3 mb-4">
+        <div class="col-md-3 mb-4 cliente-item">
             <div class="card">
                 <div class="card-body">
-                    <!-- Exibe o nome do cliente -->
                     <h5 class="card-title">{{ usuario.username }}</h5>
                     <p class="card-text">Telefone: {{ usuario.cliente.telefone if usuario.cliente and usuario.cliente.telefone else 'Não Informado' }}</p>
                     <p class="card-text">Email: {{ usuario.cliente.email if usuario.cliente else 'Não Informado' }}</p>
-                    <!-- Rota para editar cliente -->
                     <a href="{{ url_for('editar_cliente', id=usuario.id) }}" class="btn btn-warning btn-sm">
                         <i class="fas fa-edit"></i> Editar
                     </a>
-                    <!-- Rota para ver pets -->
                     <a href="{{ url_for('ver_pets', cliente_id=usuario.id) }}" class="btn btn-info btn-sm">
                         <i class="fas fa-paw"></i> Ver Pets
                     </a>
-                    <!-- Rota para remover cliente -->
                     <form action="{{ url_for('remover_cliente', id=usuario.id) }}" method="POST" style="display:inline;">
                         <button type="submit" class="btn btn-danger btn-sm">
                             <i class="fas fa-trash"></i> Remover
@@ -177,5 +173,49 @@
 <!-- Scripts do Bootstrap -->
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
+
+<!-- Script de Pesquisa -->
+<script>
+    let debounceTimeout;
+
+    function debounce(callback, delay) {
+        clearTimeout(debounceTimeout);
+        debounceTimeout = setTimeout(callback, delay);
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchBtn = document.getElementById('searchBtn');
+        const searchInput = document.getElementById('searchInput');
+        const clientesContainer = document.getElementById('clientesContainer');
+        const clientes = document.querySelectorAll('.cliente-item');
+
+        // Função para filtrar os clientes
+        function filterClientes() {
+            const searchTerm = searchInput.value.toLowerCase();
+
+            clientes.forEach(cliente => {
+                const nomeCliente = cliente.querySelector('.card-title').textContent.toLowerCase();
+                
+                // Mostrar ou esconder o cliente com base no termo de pesquisa
+                if (nomeCliente.includes(searchTerm)) {
+                    cliente.style.display = '';  // Mostrar o cliente
+                } else {
+                    cliente.style.display = 'none';  // Esconder o cliente
+                }
+            });
+        }
+
+        // Chama a função de filtro quando o botão de pesquisa é clicado
+        searchBtn.addEventListener('click', function() {
+            debounce(filterClientes, 300);  // Delay de 300ms
+        });
+
+        // Adiciona um evento de tecla para filtrar automaticamente enquanto digita
+        searchInput.addEventListener('input', function() {
+            debounce(filterClientes, 300);  // Delay de 300ms
+        });
+    });
+</script>
+
 </body>
 </html>

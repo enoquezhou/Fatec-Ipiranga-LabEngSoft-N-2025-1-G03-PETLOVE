@@ -107,12 +107,12 @@
                     </li>
                 </ul>
                  <!-- Barra de pesquisa com ícone de lupa -->
-            <form class="d-flex ms-auto" role="search">
-                <input class="form-control me-2" type="search" placeholder="Pesquisar" aria-label="Search">
-                <button class="btn btn-outline-success" type="submit">
-                    <i class="fas fa-search"></i> <!-- Ícone de lupa -->
-                </button>
-            </form>
+                 <form class="d-flex ms-auto" onsubmit="event.preventDefault(); searchText();" role="search">
+                    <input id="searchInput" class="form-control me-2" type="search" placeholder="Pesquisar palavra/letra" aria-label="Search">
+                    <button class="btn btn-outline-success" type="submit">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </form>
 
             <!-- Botão de Logout -->
             <ul class="navbar-nav ms-3">
@@ -130,7 +130,7 @@
         </div>
     </nav>
 
-    <div class="container-fluid content-container">
+    <div id="profileContent" class="container-fluid content-container">
         <!-- Mensagem de boas-vindas ao usuário -->
         <h1 class="text-center">Welcome {{ current_user.username }}!</h1>
         <p class="text-center mt-3">Bem-vindo ao painel de gerenciamento do seu pet shop. Selecione uma das opções de navegação acima para acessar as funcionalidades.</p>
@@ -140,6 +140,41 @@
         <p>© 2025 PetLove - Todos os direitos reservados</p>
     </footer>
     
+    <script>
+        function searchText() {
+            const input = document.getElementById('searchInput').value.trim();
+            const content = document.getElementById('profileContent');  // Pesquisa apenas dentro do conteúdo principal
+    
+            // Remove marcas anteriores
+            const marks = content.querySelectorAll('mark');
+            marks.forEach(mark => {
+                const parent = mark.parentNode;
+                parent.replaceChild(document.createTextNode(mark.textContent), mark);
+                parent.normalize(); // Junta nós de texto quebrados
+            });
+    
+            if (input === "") return;
+    
+            const regex = new RegExp(input, 'gi');
+    
+            // Função recursiva para destacar texto
+            function highlight(node) {
+                if (node.nodeType === 3) { // Node de texto
+                    const match = node.nodeValue.match(regex);
+                    if (match) {
+                        const span = document.createElement('span');
+                        span.innerHTML = node.nodeValue.replace(regex, (val) => `<mark>${val}</mark>`);
+                        node.replaceWith(...span.childNodes);
+                    }
+                } else if (node.nodeType === 1 && node.childNodes && !['SCRIPT', 'STYLE', 'MARK'].includes(node.tagName)) {
+                    node.childNodes.forEach(highlight);
+                }
+            }
+    
+            highlight(content);
+        }
+    </script>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     </body>
     </html>
