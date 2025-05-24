@@ -15,6 +15,8 @@ from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
 from wtforms import StringField, PasswordField, SubmitField, SelectField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError, Optional
+from flask import Flask, render_template, request
+
 
 utc_now = datetime.now(pytz.utc)
 

@@ -1,169 +1,127 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clientes - Gerenciamento de Pet Shop</title>
-    <!-- Link para o Bootstrap -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Chilanka&family=Montserrat:wght@300&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --accent-color: #DEAD6F;
-            --dark-color: #222222;
-            --light-dark-color: #727272;
-            --light-color: #fff;
-            --grey-color: #dbdbdb;
-            --light-grey-color: #fafafa;
-            --primary-color: #6995B1;
-            --light-primary-color: #eef1f3;
-            --body-font: 'Chilanka', cursive;
-            --heading-font: 'Chilanka', cursive;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Meus Agendamentos</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chilanka&family=Montserrat:wght@300&display=swap"/>
 
-        body {
-            font-family: var(--body-font);
-            background-color: var(--light-grey-color);
-            padding-bottom: 60px; /* Espaço para o rodapé fixo */
-        }
+  <style>
+    :root {
+      --accent-color: #DEAD6F;
+      --dark-color: #222222;
+      --light-dark-color: #727272;
+      --light-color: #fff;
+      --grey-color: #dbdbdb;
+      --light-grey-color: #fafafa;
+      --primary-color: #6995B1;
+      --light-primary-color: #eef1f3;
+      --body-font: 'Chilanka', cursive;
+      --heading-font: 'Chilanka', cursive;
+      --secondary-font: 'Montserrat', sans-serif;
+    }
 
-        .bg-custom {
-            background-color: var(--light-color);
-        }
+    body {
+      font-family: var(--body-font);
+      background-color: var(--light-grey-color);
+      padding-bottom: 60px;
+    }
 
-        .navbar {
-            height: 120px;
-        }
+    .navbar {
+      height: 120px;
+      background-color: var(--light-color);
+    }
 
-        .content-container {
-            padding: 1% 4%;
-        }
+    .card {
+      border-radius: 20px;
+      background-color: var(--light-primary-color);
+      border: 1px solid var(--grey-color);
+      padding: 20px;
+      margin-bottom: 30px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
 
-        .card {
-            border-radius: 20px;
-            background-color: var(--light-primary-color);
-            transition: transform 0.2s;
-        }
+    .card-header {
+      font-size: 1.3rem;
+      font-weight: bold;
+      margin-bottom: 15px;
+      color: var(--dark-color);
+    }
 
-        .card:hover {
-            transform: scale(1.05);
-        }
+    .card-body {
+      padding: 0;
+    }
 
-        .card-title {
-            font-size: 1.5rem;
-            color: var(--dark-color);
-        }
+    .info-agendamento p {
+      margin: 5px 0;
+      font-size: 1rem;
+      color: var(--dark-color);
+    }
 
-        .card-text {
-            font-size: 1.2rem;
-            color: var(--light-dark-color);
-        }
+    .info-agendamento p strong {
+      font-weight: bold;
+      color: var(--light-dark-color);
+      display: inline-block;
+      width: 110px;
+    }
 
-        footer {
-            margin: 0;
-        }
+    .info-agendamento ul {
+      margin-top: 10px;
+      padding-left: 20px;
+      font-size: 0.95rem;
+    }
 
-        .btn-primary, .btn-secondary {
-            background-color: var(--accent-color);
-            color: white;
-            font-weight: bold;
-            border: none;
-            padding: 15px 30px;
-            font-size: 1.2rem;
-            animation: flash-text-blue 1s infinite;
-        }
+    .card-footer {
+      text-align: center;
+      padding-top: 15px;
+      background-color: transparent;
+      border-top: none;
+    }
 
-        .btn-secondary {
-            background-color: var(--grey-color);
-        }
+    .btn-warning,
+    .btn-danger {
+      width: 80%;
+      font-size: 0.9rem;
+      margin-bottom: 10px;
+      padding: 10px;
+      border-radius: 10px;
+    }
 
-        .text-flash-blue {
-            animation: flash-text-blue 1s infinite;
-        }
+    .btn-primary {
+      background-color: var(--accent-color);
+      color: white;
+      font-weight: bold;
+      border: none;
+      padding: 15px 30px;
+      font-size: 1.2rem;
+    }
 
-        @keyframes flash-text-blue {
-            0%, 100% {
-                color: white; /* Cor inicial e final */
-            }
-            50% {
-                color: var(--accent-color); /* Azul no meio do ciclo */
-            }
-        }
+    .btn-sm {
+      height: auto;
+      font-size: 0.85rem;
+      padding: 10px 20px;
+    }
 
-        .table {
-            width: 100%;
-            margin-top: 20px;
-            background-color: #7454bc;
-            border-radius: 20px;
-            border-collapse: separate;
-        }
+    .text-flash-blue {
+      animation: flash-text-blue 1s infinite;
+    }
 
-        .table th, .table td {
-            padding: 10px;
-        }
+    @keyframes flash-text-blue {
+      0%, 100% {
+        color: white;
+      }
+      50% {
+        color: var(--accent-color);
+      }
+    }
+  </style>
 
-        .table thead th:first-child {
-            border-top-left-radius: 20px;
-        }
-
-        .table thead th:last-child {
-            border-top-right-radius: 20px;
-        }
-
-        .table tbody tr:last-child td:first-child {
-            border-bottom-left-radius: 20px;
-        }
-
-        .table tbody tr:last-child td:last-child {
-            border-bottom-right-radius: 20px;
-        }
-
-        .table td:first-child, .table th:first-child {
-            border-left: 1px solid black;
-        }
-
-        .table td:last-child, .table th:last-child {
-            border-right: 1px solid black;
-        }
-
-        .table tbody tr:first-child td {
-            border-top: 1px solid black;
-        }
-
-        .table tbody tr:last-child td {
-            border-bottom: 1px solid black;
-        }
-
-        footer {
-            margin: 0;
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-        }
-
-        .btn-container {
-            margin-bottom: 20px;
-        }
-
-        .btn-container .btn-secondary {
-            margin-left: 20px; /* Distância entre os botões */
-        }
-
-        .btn-sm {
-            width: 120px;
-            height: 50px;
-            font-size: 0.8rem;
-            padding: 14px 24px;
-        }
-
-        .btn-primary {
-            background-color: var(--accent-color);
-            color: white;
-            font-weight: bold;
-            border: none;
-        }
-    </style>
 </head>
 <body>
 
@@ -205,90 +163,94 @@
                         </a>
                     </li>
                 </ul>
-                <form class="d-flex ms-auto" role="search" method="GET" action="{{ url_for('clientes') }}">
-                    <input class="form-control me-2" type="search" placeholder="Pesquisar" aria-label="Pesquisar" name="search">
-                    <button class="btn btn-outline-success" type="submit">
-                        <i class="fas fa-search"></i>
-                    </button>
-                </form>
-                 <!-- Botão de Logout -->
-                            <!-- Botão de Logout -->
-            <ul class="navbar-nav ms-3">
-                {% if current_user.role == 'cliente' %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Logout Cliente</a>
-                    </li>
-                {% elif current_user.role == 'prestador' %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Logout Prestador</a>
-                    </li>
-                {% endif %}
-            </ul>
-            </div>
-        </div>
-    </nav>
+      <form class="d-flex ms-auto" onsubmit="event.preventDefault(); filterCards();" role="search">
+        <input id="searchInput" class="form-control me-2" type="search" placeholder="Pesquisar palavra/letra" aria-label="Search">
+        <button class="btn btn-outline-success" type="submit">
+            <i class="fas fa-search"></i>
+        </button>
+      </form>
 
-    <!-- Conteúdo Principal -->
-    <div class="container-fluid content-container">
-        <div class="btn-container">
-            <a href="{{ url_for('adicionar_agendamento') }}" class="btn btn-primary my-3 text-flash-blue">Adicionar Agendamento</a>
-        </div>
-
-        <table class="table table-bordered">
-            <thead>
-                <tr>
-                    <th>Nome Cliente</th>
-                    <th>Nome Pet</th>
-                    <th>Espécie</th>
-                    <th>Serviço</th>
-                    <th>Data</th>
-                    <th>Horário</th>
-                    <th>Prestador</th>
-                    <th>Produtos</th>
-                    <th>Ações</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for agendamento in agendamentos %}
-                    <tr>
-                        <td>{{ agendamento.cliente.nome }}</td>
-                        <td>{{ agendamento.pet.nome }}</td>
-                        <td>{{ agendamento.pet.especie }}</td>
-                        <td>{{ agendamento.servico }}</td>
-                        <td>{{ agendamento.data }}</td>11
-                        <td>{{ agendamento.horario }}</td>
-                        <td>{{ agendamento.prestador }}</td>
-                        <td>
-                            {% if agendamento.produtos %}
-                                <ul>
-                                    {% for produto in agendamento.produtos %}
-                                        <li>{{ produto.produto.nome }} - Quantidade: {{ produto.quantidade }}</li>
-                                    {% endfor %}
-                                </ul>
-                            {% else %}
-                                Nenhum produto
-                            {% endif %}
-                        </td>
-                        <td>
-                            <a href="{{ url_for('editar_agendamento', id=agendamento.id) }}" class="btn btn-warning btn-sm">
-                                <i class="fas fa-edit"></i> Editar
-                            </a>
-                            <form action="{{ url_for('remover_agendamento', id=agendamento.id) }}" method="POST" style="display:inline;">
-                                <button type="submit" class="btn btn-danger btn-sm">
-                                    <i class="fas fa-trash-alt"></i> Remover
-                                </button>
-                            </form>
-                        </td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+      <ul class="navbar-nav ms-3">
+        {% if current_user.role == 'cliente' %}
+        <li class="nav-item">
+          <a class="nav-link" href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Logout Cliente</a>
+        </li>
+        {% elif current_user.role == 'prestador' %}
+        <li class="nav-item">
+          <a class="nav-link" href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Logout Prestador</a>
+        </li>
+        {% endif %}
+      </ul>
     </div>
+  </div>
+</nav>
 
-    <footer class="bg-dark text-white text-center py-3 mt-5 fixed-bottom">
-        <p>© 2025 PetLove - Todos os direitos reservados</p>
-    </footer>
+<div id="profileContent" class="container mt-5">
+  <h1>Meus Agendamentos</h1>
+  <div class="btn-container">
+    <a href="{{ url_for('adicionar_agendamento') }}" class="btn btn-primary my-3 text-flash-blue">Adicionar Agendamento</a>
+  </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+  {% if agendamentos %}
+  <div class="d-flex flex-wrap gap-5 justify-content-center" id="agendamentoContainer">
+    {% for agendamento in agendamentos %}
+    <div class="card card-agendamento" style="width: 400px;">
+      <div class="card-header">
+        Agendamento - {{ agendamento.pet.nome }} ({{ agendamento.pet.especie }})
+      </div>
+      <div class="card-body">
+        <div class="info-agendamento">
+          <p><strong>Espécie:</strong> {{ agendamento.pet.especie }}</p>
+          <p><strong>Serviço:</strong> {{ agendamento.servico }}</p>
+          <p><strong>Data:</strong> {{ agendamento.data }}</p>
+          <p><strong>Horário:</strong> {{ agendamento.horario.strftime('%H:%M') }}</p>
+          <p><strong>Prestador:</strong> {{ agendamento.prestador }}</p>
+
+          {% if agendamento.produtos %}
+            <p><strong>Produtos:</strong></p>
+            <ul>
+              {% for produto in agendamento.produtos %}
+              <li>{{ produto.produto.nome }} - Quantidade: {{ produto.quantidade }}</li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <p><strong>Sem produtos associados.</strong></p>
+          {% endif %}
+        </div>
+      </div>
+      <div class="card-footer text-center">
+        <a href="{{ url_for('editar_agendamento', id=agendamento.id) }}" class="btn btn-warning btn-sm me-2">
+          <i class="fas fa-edit"></i> Editar
+        </a>
+        <form action="{{ url_for('remover_agendamento', id=agendamento.id) }}" method="POST" style="display:inline;">
+          <button type="submit" class="btn btn-danger btn-sm">
+            <i class="fas fa-trash-alt"></i> Remover
+          </button>
+        </form>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p>Você não tem agendamentos no momento.</p>
+  {% endif %}
+</div>
+
+<footer class="bg-dark text-white text-center py-3 mt-5 fixed-bottom">
+  <p>© 2025 PetLove - Todos os direitos reservados</p>
+</footer>
+
+<script>
+  function filterCards() {
+    const input = document.getElementById('searchInput').value.toLowerCase();
+    const cards = document.querySelectorAll('.card-agendamento');
+
+    cards.forEach(card => {
+      const text = card.innerText.toLowerCase();
+      card.style.display = text.includes(input) ? 'flex' : 'none';
+    });
+  }
+</script>
+
 </body>
 </html>

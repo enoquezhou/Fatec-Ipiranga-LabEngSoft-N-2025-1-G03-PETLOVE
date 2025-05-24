@@ -1,0 +1,21 @@
+<!-- templates/resultados.html -->
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Resultados da Pesquisa</title>
+</head>
+<body>
+    <h2>Resultados para "{{ termo }}"</h2>
+    <ul>
+        {% if resultados %}
+            {% for r in resultados %}
+                <li>{{ r }}</li>
+            {% endfor %}
+        {% else %}
+            <li>Nenhum resultado encontrado.</li>
+        {% endif %}
+    </ul>
+    <a href="{{ url_for('home_cliente') }}">Voltar</a>
+</body>
+</html>
