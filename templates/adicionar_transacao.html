@@ -111,6 +111,16 @@
 
     <form method="POST" onsubmit="return validarFormulario()">
       <div class="input-box-adicionar-transacao">
+        <label for="cliente_id" class="label-box">Cliente:</label>
+        <select name="cliente_id" id="cliente_id" required>
+          <option value="">Selecione o cliente</option>
+          {% for cliente in clientes %}
+            <option value="{{ cliente.id }}">{{ cliente.nome }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="input-box-adicionar-transacao">
         <label for="tipo" class="label-box">Tipo:</label>
         <select name="tipo" id="tipo" required>
           <option value="">Selecione o tipo</option>
@@ -137,6 +147,12 @@
 
   <script>
     function validarFormulario() {
+      var clienteId = document.getElementById("cliente_id").value;
+      if (clienteId === "") {
+        alert("Por favor, selecione um cliente.");
+        return false;
+      }
+
       var tipo = document.getElementById("tipo").value;
       if (tipo === "") {
         alert("Por favor, selecione o tipo de transação.");
