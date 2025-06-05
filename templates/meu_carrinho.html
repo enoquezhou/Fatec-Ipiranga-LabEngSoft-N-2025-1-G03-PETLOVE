@@ -97,6 +97,15 @@
         .hidden {
             display: none !important;
         }
+          input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    input[type=number] {
+    -moz-appearance: textfield; /* Firefox */
+    }
     </style>
 </head>
 <body>
@@ -172,8 +181,8 @@
                     <tr>
                         <td>{{ item.produto.nome }}</td>
                         <td>
-                            1
-                            <input type="hidden" name="quantidade_{{ item.id }}" value="1">
+                            <input type="number" name="quantidade_{{ item.id }}" value="{{ item.quantidade }}" min="1" 
+                            class="form-control">
                         </td>
                         <td>R$ {{ '%.2f'|format(item.produto.preco) }}</td>
                         <td>R$ {{ '%.2f'|format(1 * item.produto.preco) }}</td>

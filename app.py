@@ -237,15 +237,28 @@ def meu_carrinho():
 
     if request.method == 'POST':
         try:
-            # Exemplo: validar estoque e finalizar compra
+            # Atualiza as quantidades conforme o input do usuário
+            for item in carrinho.itens:
+                quantidade_form = request.form.get(f'quantidade_{item.id}')
+                if quantidade_form:
+                    nova_quantidade = int(quantidade_form)
+                    if nova_quantidade < 1:
+                        nova_quantidade = 1  # Garantir que seja no mínimo 1
+                    item.quantidade = nova_quantidade
+
+            db.session.commit()  # Commit para salvar as quantidades atualizadas
+
+            # Valida estoque
             for item in carrinho.itens:
                 if item.produto.quantidade < item.quantidade:
                     flash(f"Estoque insuficiente para {item.produto.nome}.")
                     return redirect(url_for('meu_carrinho'))  # retorno obrigatório!
 
+            # Dá baixa no estoque
             for item in carrinho.itens:
                 item.produto.quantidade -= item.quantidade
 
+            # Finaliza a compra
             carrinho.status = 'finalizada'
             db.session.commit()
 
