@@ -1,29 +1,26 @@
 import os
 import re
 from datetime import datetime
+from zoneinfo import ZoneInfo
 from functools import wraps
 import pytz
 from flask import Flask, render_template, request, redirect, url_for, jsonify, flash, session, abort
-from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
+from flask_login import (
+    LoginManager, UserMixin, login_user, current_user, logout_user, login_required
+)
 from flask_migrate import Migrate
-from flask_login import LoginManager, UserMixin, login_user, current_user, logout_user, login_required
+from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import FlaskForm
 from sqlalchemy import Table, Column, Integer, ForeignKey
 from sqlalchemy.orm import relationship
+from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import secure_filename
-from werkzeug.security import generate_password_hash, check_password_hash
 from wtforms import StringField, PasswordField, SubmitField, SelectField
-from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError, Optional
-from flask import Flask, render_template, request
+from wtforms.validators import DataRequired, Email, EqualTo, Length, Optional, ValidationError
 
 
-utc_now = datetime.now(pytz.utc)
 
-brasilia_tz = pytz.timezone('America/Sao_Paulo')
-brasilia_time = utc_now.astimezone(brasilia_tz)
-
-formatted_time = brasilia_time.strftime('%d/%m/%Y %H:%M:%S')
 
 app = Flask(__name__)
 bcrypt = Bcrypt(app)  
@@ -40,6 +37,8 @@ login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 login_manager.login_message_category = 'info'
 
+
+
 if not os.path.exists(app.config['UPLOAD_FOLDER']):
     os.makedirs(app.config['UPLOAD_FOLDER'])
 
@@ -51,17 +50,6 @@ def allowed_file(filename):
 with app.app_context():
     db.create_all() 
 
-class User(db.Model, UserMixin):
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(20), unique=True, nullable=False)
-    email = db.Column(db.String(120), unique=True, nullable=False)
-    password = db.Column(db.String(60), nullable=False)
-    role = db.Column(db.String(20), nullable=False, default='cliente')
-    cliente_id = db.Column(db.Integer, db.ForeignKey('cliente.id'))  
-    cliente = db.relationship('Cliente', back_populates='usuario', lazy=True)
-
-    def __repr__(self):
-        return f"User('{self.username}', '{self.email}', '{self.role}')"
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -124,7 +112,22 @@ class RegistrationForm(FlaskForm):
         if user:
             raise ValidationError('Este nome de usuário já está em uso. Escolha outro.')
 
-        
+@app.route('/graficos_financeiros')
+@login_required
+def graficos_financeiros():
+    transacoes = Transacao.query.filter_by(cliente_id=current_user.cliente.id).all()
+    transacoes_json = [
+        {
+            'tipo': t.tipo,
+            'valor': t.valor,
+            'descricao': t.descricao,
+            'data': t.data.strftime('%Y-%m-%d')
+        }
+        for t in transacoes
+    ]
+    return render_template('graficos.html', transacoes=transacoes_json)
+
+  
 @app.route("/register", methods=['GET', 'POST'])
 def register():
     if current_user.is_authenticated:
@@ -238,11 +241,84 @@ def home_cliente():
     return render_template('homecliente.html')
 
 
-@app.route("/home_prestador")
+@app.route('/meu_carrinho', methods=['GET', 'POST'])
 @login_required
-@role_required('prestador')
+def meu_carrinho():
+    cliente_id = current_user.cliente.id
+    carrinho = Carrinho.query.filter_by(cliente_id=cliente_id, status='ativo').first()
+
+    if request.method == 'POST':
+        try:
+            # Atualiza as quantidades conforme o input do usuário
+            for item in carrinho.itens:
+                quantidade_form = request.form.get(f'quantidade_{item.id}')
+                if quantidade_form:
+                    nova_quantidade = int(quantidade_form)
+                    if nova_quantidade < 1:
+                        nova_quantidade = 1  # Garantir que seja no mínimo 1
+                    item.quantidade = nova_quantidade
+
+            db.session.commit()  # Commit para salvar as quantidades atualizadas
+
+            # Valida estoque
+            for item in carrinho.itens:
+                if item.produto.quantidade < item.quantidade:
+                    flash(f"Estoque insuficiente para {item.produto.nome}.")
+                    return redirect(url_for('meu_carrinho'))  # retorno obrigatório!
+
+            # Dá baixa no estoque
+            for item in carrinho.itens:
+                item.produto.quantidade -= item.quantidade
+
+            # Finaliza a compra
+            carrinho.status = 'finalizada'
+            db.session.commit()
+
+            flash("Compra finalizada com sucesso!")
+            return redirect(url_for('finalizada_compra'))  # retorno obrigatório!
+
+        except Exception as e:
+            db.session.rollback()
+            flash("Erro ao finalizar a compra.")
+            return redirect(url_for('meu_carrinho'))  # retorno obrigatório!
+
+    # método GET
+    if not carrinho or not carrinho.itens:
+        flash("Seu carrinho está vazio.")
+        return render_template('meu_carrinho.html', carrinho_itens=[])
+
+    carrinho_itens = carrinho.itens
+    total_geral = sum(item.produto.preco * item.quantidade for item in carrinho_itens)
+
+    return render_template('meu_carrinho.html', carrinho_itens=carrinho_itens, total_geral=total_geral)
+
+import json
+
+@app.route('/home_prestador')
+@login_required
 def home_prestador():
-    return render_template('homeprestador.html')
+    # Busca todas as transações no banco (exemplo)
+    # Ajuste conforme seu modelo e necessidade
+    transacoes = []
+    try:
+        # Supondo que você importe o modelo Transacao do seu app.py
+        transacoes_db = Transacao.query.order_by(Transacao.data.asc()).all()
+
+        for t in transacoes_db:
+            transacoes.append({
+                'id': t.id,
+                'tipo': t.tipo,  # 'entrada' ou 'saida'
+                'valor': t.valor,
+                'descricao': t.descricao,
+                'data': t.data.strftime('%Y-%m-%dT%H:%M:%S')  # ISO format para JS
+            })
+    except Exception as e:
+        print(f"Erro ao buscar transações: {e}")
+
+    transacoes_json = json.dumps(transacoes)
+
+    return render_template('homeprestador.html', transacoes=transacoes_json)
+
 
 # Rota para logout
 @app.route("/logout")
@@ -268,146 +344,9 @@ def show_users():
     users = User.query.all()  
     return render_template('users.html', users=users)
 
-class Produto(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    nome = db.Column(db.String(120), nullable=False)
-    descricao = db.Column(db.String(255))
-    quantidade = db.Column(db.Integer, nullable=False)
-    preco = db.Column(db.Float, nullable=False)
-    foto = db.Column(db.String(120))  
-    imagem = db.Column(db.String(200), nullable=True)  
-    prestador_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)  
-    prestador = db.relationship('User', backref=db.backref('produtos', lazy=True))
-
-    def __repr__(self):
-        return f'<Produto {self.nome}>'
-
-class Cliente(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    nome = db.Column(db.String(120), nullable=False)
-    email = db.Column(db.String(120), unique=True, nullable=False)
-    telefone = db.Column(db.String(20), nullable=True)  
-
-    financeiros = db.relationship('LancamentoFinanceiro', back_populates='cliente', lazy=True)
-
-    pets = db.relationship('Pet', back_populates='cliente', lazy=True)
-
-    usuario = db.relationship('User', back_populates='cliente', uselist=False)
-
-    def __repr__(self):
-        return f'<Cliente {self.nome}>'
-
-
-
-class Pet(db.Model):
-    __tablename__ = 'pet'
-
-    id = db.Column(db.Integer, primary_key=True)
-    nome = db.Column(db.String(80), nullable=False)
-    idade = db.Column(db.Integer)
-    sexo = db.Column(db.String(10))
-    especie = db.Column(db.String(50))
-    cliente_id = db.Column(db.Integer, db.ForeignKey('cliente.id'), nullable=False)  
-    foto = db.Column(db.String(120), nullable=True)
-
-    cliente = db.relationship('Cliente', back_populates='pets')
-
-    def __repr__(self):
-        return f'<Pet {self.nome}>'
-
-class Agendamento(db.Model):
-    __tablename__ = 'agendamentos'
-    
-    id = db.Column(db.Integer, primary_key=True)
-    cliente_id = db.Column(db.Integer, db.ForeignKey('cliente.id'))
-    pet_id = db.Column(db.Integer, db.ForeignKey('pet.id'))
-    especie = db.Column(db.String(50))
-    servico = db.Column(db.String(50))
-    data = db.Column(db.Date)
-    horario = db.Column(db.Time)
-    prestador = db.Column(db.String(100))
-
-    cliente = db.relationship('Cliente', backref='agendamentos')
-    pet = db.relationship('Pet', backref='agendamentos')
-    
-    produtos = db.relationship('AgendamentoProduto', back_populates='agendamento', cascade="all, delete-orphan")
-
-    def __init__(self, cliente_id, pet_id, especie, servico, data, horario, prestador):
-        self.cliente_id = cliente_id
-        self.pet_id = pet_id
-        self.especie = especie
-        self.servico = servico
-        self.data = data
-        self.horario = horario
-        self.prestador = prestador
-
-class AgendamentoProduto(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    agendamento_id = db.Column(db.Integer, db.ForeignKey('agendamentos.id'), nullable=False)
-    produto_id = db.Column(db.Integer, db.ForeignKey('produto.id'), nullable=False)
-    quantidade = db.Column(db.Integer, nullable=False)
-
-    agendamento = db.relationship('Agendamento', back_populates='produtos')
-    produto = db.relationship('Produto')
-
-    def __repr__(self):
-        return f'<AgendamentoProduto {self.id}>'
-    
-class Transacao(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    tipo = db.Column(db.String(50), nullable=False)  
-    valor = db.Column(db.Float, nullable=False)
-    descricao = db.Column(db.String(250))
-    data = db.Column(db.DateTime, default=datetime.utcnow)
-    
-    def __repr__(self):
-        return f'<Transacao {self.tipo} {self.valor}>'
-
-class LancamentoFinanceiro(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    cliente_id = db.Column(db.Integer, db.ForeignKey('cliente.id'), nullable=False)
-    tipo = db.Column(db.String(50), nullable=False)  
-    valor = db.Column(db.Float, nullable=False)
-    descricao = db.Column(db.String(255))
-
-    cliente = db.relationship('Cliente', back_populates='financeiros')
-
-    def __repr__(self):
-        return f'<LancamentoFinanceiro {self.descricao}>'
-    
-#class Carrinho(db.Model):
-    #id = db.Column(db.Integer, primary_key=True)
-    #cliente_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    #cliente = db.relationship('User', backref='carrinhos', lazy=True)
-    
-    # Relacionamento de itens
-    #itens = db.relationship('CarrinhoItem', backref='carrinho_associado', lazy=True)  # Renomeamos o backref para 'carrinho_associado'
-
-#class CarrinhoItem(db.Model):
-   # id = db.Column(db.Integer, primary_key=True)
-    #produto_id = db.Column(db.Integer, db.ForeignKey('produto.id'), nullable=False)
-    #produto = db.relationship('Produto', backref='carrinhos', lazy=True)
-    #carrinho_id = db.Column(db.Integer, db.ForeignKey('carrinho.id'), nullable=False)  # Chave estrangeira para 'Carrinho'
-    #quantidade = db.Column(db.Integer, nullable=False)
-
-    # Relacionamento com o Carrinho (remover o backref aqui)
-    #carrinho = db.relationship('Carrinho', lazy=True)  # Sem 'backref' aqui para evitar duplicação
-
-
-
-# Obtendo os itens do carrinho do cliente atual
-#carrinho_items = CarrinhoItem.query.join(Carrinho).filter(Carrinho.cliente_id == current_user.id).all()
-
-# Exemplo de como exibir os resultados
-#for item in carrinho_items:
-    #print(f"Produto ID: {item.produto_id}, Quantidade: {item.quantidade}")
-
-
 @app.before_request
 def create_tables():
     db.create_all()
-
-# Rotas
 
 @app.route('/pet/<int:pet_id>')
 def pet(pet_id):
@@ -823,20 +762,40 @@ def financeiro():
     transacoes = Transacao.query.all()  
     return render_template('financeiro.html', transacoes=transacoes)
 
+from datetime import datetime
+import pytz
+
 @app.route('/adicionar_transacao', methods=['GET', 'POST'])
 def adicionar_transacao():
-    if request.method == 'POST':
-        tipo = request.form['tipo']
-        valor = request.form['valor']
-        descricao = request.form['descricao']
-        
-        nova_transacao = Transacao(tipo=tipo, valor=valor, descricao=descricao)
-        db.session.add(nova_transacao)
-        db.session.commit()
+    clientes = Cliente.query.all()
 
-        return redirect(url_for('financeiro'))
-    
-    return render_template('adicionar_transacao.html')
+    if request.method == 'POST':
+        tipo = request.form.get('tipo')
+        valor = request.form.get('valor')
+        descricao = request.form.get('descricao')
+        cliente_id = request.form.get('cliente_id')
+
+        if not tipo or not valor or not cliente_id:
+            return "Campos obrigatórios faltando", 400
+
+        brasilia_time = datetime.now(pytz.timezone('America/Sao_Paulo'))
+
+        try:
+            nova_transacao = Transacao(
+                tipo=tipo,
+                valor=float(valor),
+                descricao=descricao,
+                cliente_id=int(cliente_id),
+                data=brasilia_time  # define aqui a data com fuso horário correto
+            )
+            db.session.add(nova_transacao)
+            db.session.commit()
+            return redirect(url_for('financeiro'))
+        except Exception as e:
+            return f"Erro ao salvar a transação: {e}", 500
+
+    return render_template('adicionar_transacao.html', clientes=clientes)
+
 
 @app.route('/editar_transacao/<int:id>', methods=['GET', 'POST'])
 def editar_transacao(id):
@@ -903,32 +862,84 @@ def loja():
     produtos = Produto.query.all()  
     return render_template('loja.html', produtos=produtos)
 
+@app.route('/graficos')
+def graficos():
+    return render_template('graficos.html')
+
+
+
 @app.route('/adicionar_ao_carrinho/<int:produto_id>')
 @login_required
-@role_required('cliente')
 def adicionar_ao_carrinho(produto_id):
+    # Pega o cliente_id correto da relação usuário->cliente
+    cliente_id = current_user.cliente.id
+
+    # Buscar carrinho existente ou criar um novo
+    carrinho = Carrinho.query.filter_by(cliente_id=cliente_id, status='ativo').first()
+    if not carrinho:
+        carrinho = Carrinho(cliente_id=cliente_id, status='ativo')
+        db.session.add(carrinho)
+        db.session.commit()  # Gera o carrinho.id
+
+    # Buscar o produto
     produto = Produto.query.get(produto_id)
-    if produto:
-        carrinho_item = CarrinhoItem.query.filter_by(cliente_id=current_user.id, produto_id=produto_id).first()
-        
-        if carrinho_item:
-            flash(f'O produto {produto.nome} já está no seu carrinho.')
-        else:
-            novo_item = CarrinhoItem(cliente_id=current_user.id, produto_id=produto_id)
-            db.session.add(novo_item)
-            db.session.commit()
-            flash(f'O produto {produto.nome} foi adicionado ao seu carrinho!')
+    if not produto:
+        flash("Produto não encontrado.")
+        return redirect(url_for('loja'))  # Ou outra página
+
+    # Verificar se o produto já está no carrinho para esse carrinho
+    item = CarrinhoItem.query.filter_by(carrinho_id=carrinho.id, produto_id=produto_id).first()
+    if item:
+        # Incrementa a quantidade
+        item.quantidade += 1
     else:
-        flash('Produto não encontrado.')
+        # Cria novo item
+        item = CarrinhoItem(
+            carrinho_id=carrinho.id,
+            produto_id=produto.id,
+            cliente_id=cliente_id,
+            quantidade=1
+        )
+        db.session.add(item)
+
+    db.session.commit()
+    flash(f"Produto {produto.nome} adicionado ao carrinho.")
     return redirect(url_for('meu_carrinho'))
 
-
-@app.route('/meu_carrinho')
+@app.route('/atualizar_carrinho', methods=['POST'])
 @login_required
-@role_required('cliente')
-def meu_carrinho():
-    carrinho_items = CarrinhoItem.query.filter_by(cliente_id=current_user.id).all()
-    return render_template('meu_carrinho.html', carrinho=carrinho_items)
+def atualizar_carrinho():
+    carrinho = Carrinho.query.filter_by(cliente_id=current_user.id, status='pendente').first()
+
+    if not carrinho:
+        flash('Carrinho não encontrado.', 'danger')
+        return redirect(url_for('loja'))
+
+    for item in carrinho.itens:
+        nova_quantidade = request.form.get(f'quantidade_{item.id}')
+        if nova_quantidade:
+            try:
+                nova_qtd = int(nova_quantidade)
+                if nova_qtd > 0:
+                    item.quantidade = nova_qtd
+                else:
+                    db.session.delete(item)
+            except ValueError:
+                # Ignora valores inválidos
+                continue
+
+    db.session.commit()
+    flash('Carrinho atualizado com sucesso.', 'success')
+    return redirect(url_for('meu_carrinho'))
+
+@app.route('/remover_item/<int:item_id>')
+@login_required
+def remover_item(item_id):
+    item = CarrinhoItem.query.get(item_id)
+    if item:
+        db.session.delete(item)
+        db.session.commit()
+    return redirect(url_for('meu_carrinho'))
 
 @app.route('/remover_usuario/<int:id>')
 def remover_usuario(id):
@@ -943,35 +954,46 @@ def home():
 def perfil_cliente():
     return render_template('perfil_cliente.html')
 
-@app.route('/finalizar_compra', methods=['GET', 'POST'])
+
+@app.route('/finalizada_compra')
 @login_required
-@role_required('cliente')
-def finalizar_compra():
-    carrinho = Carrinho.query.filter_by(cliente_id=current_user.id, status='pendente').first()
-    
-    if request.method == 'POST':
-        for item in carrinho.itens:
-            produto = item.produto
-            produto.quantidade -= item.quantidade  
-            db.session.commit()  
+def finalizada_compra():
+    cliente_id = current_user.cliente.id
 
-        carrinho.status = 'finalizada'  
-        db.session.commit()  
+    carrinho = Carrinho.query.filter_by(cliente_id=cliente_id, status='finalizada').order_by(Carrinho.id.desc()).first()
 
-        flash("Compra finalizada com sucesso!")
-        return redirect(url_for('home_cliente'))  
-    
-    return render_template('finalizar_compra.html', carrinho=carrinho)
+    if not carrinho or not carrinho.itens:
+        flash("Nenhum item encontrado.")
+        return render_template('finalizada_compra.html', itens=[])
 
+    itens = carrinho.itens
+    total = sum(item.produto.preco * item.quantidade for item in itens)
+
+    transacao_existente = Transacao.query.filter_by(
+        cliente_id=cliente_id,
+        valor=total,
+        descricao=f'Compra finalizada - carrinho #{carrinho.id}'
+    ).first()
+
+    if not transacao_existente:
+        brasilia_time = datetime.now(pytz.timezone('America/Sao_Paulo'))  # pega o horário de Brasília
+        nova_transacao = Transacao(
+            tipo='entrada',
+            valor=total,
+            descricao=f'Compra finalizada - carrinho #{carrinho.id}',
+            cliente_id=cliente_id,
+            data=brasilia_time  # define a data aqui
+        )
+        db.session.add(nova_transacao)
+        db.session.commit()
+
+    return render_template('finalizada_compra.html', itens=itens, total=total)
 
 @app.route('/confirmar_compra', methods=['POST'])
-def confirmar_compra():
-    return redirect(url_for('home'))  
-
-@app.route('/carrinho')
 @login_required
-def carrinho():
-    return render_template('carrinho.html')
+def confirmar_compra():
+    # Como a confirmação já está na rota finalizar_compra, aqui só redireciona
+    return redirect(url_for('home'))
 
 @app.route("/esqueci_senha", methods=['GET', 'POST'])
 def esqueci_senha():
@@ -987,6 +1009,149 @@ def esqueci_senha():
             flash('Usuário não encontrado.', 'danger')
     
     return render_template('esqueci_senha.html')
+
+class Produto(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    nome = db.Column(db.String(120), nullable=False)
+    descricao = db.Column(db.String(255))
+    quantidade = db.Column(db.Integer, nullable=False)
+    preco = db.Column(db.Float, nullable=False)
+    foto = db.Column(db.String(120))  
+    imagem = db.Column(db.String(200), nullable=True)  
+    prestador_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)  
+    prestador = db.relationship('User', backref=db.backref('produtos', lazy=True))
+
+    def __repr__(self):
+        return f'<Produto {self.nome}>'
+
+class Cliente(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    nome = db.Column(db.String(120), nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    telefone = db.Column(db.String(20), nullable=True)  
+
+    financeiros = db.relationship('LancamentoFinanceiro', back_populates='cliente', lazy=True)
+
+    pets = db.relationship('Pet', back_populates='cliente', lazy=True)
+
+    usuario = db.relationship('User', back_populates='cliente', uselist=False)
+
+    def __repr__(self):
+        return f'<Cliente {self.nome}>'
+
+class Pet(db.Model):
+    __tablename__ = 'pet'
+
+    id = db.Column(db.Integer, primary_key=True)
+    nome = db.Column(db.String(80), nullable=False)
+    idade = db.Column(db.Integer)
+    sexo = db.Column(db.String(10))
+    especie = db.Column(db.String(50))
+    cliente_id = db.Column(db.Integer, db.ForeignKey('cliente.id'), nullable=False)  
+    foto = db.Column(db.String(120), nullable=True)
+
+    cliente = db.relationship('Cliente', back_populates='pets')
+
+    def __repr__(self):
+        return f'<Pet {self.nome}>'
+
+class Agendamento(db.Model):
+    __tablename__ = 'agendamentos'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    cliente_id = db.Column(db.Integer, db.ForeignKey('cliente.id'))
+    pet_id = db.Column(db.Integer, db.ForeignKey('pet.id'))
+    especie = db.Column(db.String(50))
+    servico = db.Column(db.String(50))
+    data = db.Column(db.Date)
+    horario = db.Column(db.Time)
+    prestador = db.Column(db.String(100))
+
+    cliente = db.relationship('Cliente', backref='agendamentos')
+    pet = db.relationship('Pet', backref='agendamentos')
+    
+    produtos = db.relationship('AgendamentoProduto', back_populates='agendamento', cascade="all, delete-orphan")
+
+    def __init__(self, cliente_id, pet_id, especie, servico, data, horario, prestador):
+        self.cliente_id = cliente_id
+        self.pet_id = pet_id
+        self.especie = especie
+        self.servico = servico
+        self.data = data
+        self.horario = horario
+        self.prestador = prestador
+
+class AgendamentoProduto(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    agendamento_id = db.Column(db.Integer, db.ForeignKey('agendamentos.id'), nullable=False)
+    produto_id = db.Column(db.Integer, db.ForeignKey('produto.id'), nullable=False)
+    quantidade = db.Column(db.Integer, nullable=False)
+
+    agendamento = db.relationship('Agendamento', back_populates='produtos')
+    produto = db.relationship('Produto')
+
+    def __repr__(self):
+        return f'<AgendamentoProduto {self.id}>'
+    
+class Transacao(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    tipo = db.Column(db.String(50), nullable=False)  
+    valor = db.Column(db.Float, nullable=False)
+    descricao = db.Column(db.String(250))
+    data = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    cliente_id = db.Column(db.Integer, db.ForeignKey('cliente.id'), nullable=False)
+    
+    def __repr__(self):
+        return f'<Transacao {self.tipo} {self.valor}>'
+
+
+class LancamentoFinanceiro(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    cliente_id = db.Column(db.Integer, db.ForeignKey('cliente.id'), nullable=False)
+    tipo = db.Column(db.String(50), nullable=False)  
+    valor = db.Column(db.Float, nullable=False)
+    descricao = db.Column(db.String(255))
+
+    cliente = db.relationship('Cliente', back_populates='financeiros')
+
+    def __repr__(self):
+        return f'<LancamentoFinanceiro {self.descricao}>'
+    
+
+class CarrinhoItem(db.Model):
+    __tablename__ = 'carrinho_item'
+    __table_args__ = (db.UniqueConstraint('carrinho_id', 'produto_id', name='_carrinho_produto_uc'),)
+    
+    id = db.Column(db.Integer, primary_key=True)
+    carrinho_id = db.Column(db.Integer, db.ForeignKey('carrinho.id'))
+    produto_id = db.Column(db.Integer, db.ForeignKey('produto.id'))
+    cliente_id = db.Column(db.Integer, db.ForeignKey('cliente.id'), nullable=False)
+    quantidade = db.Column(db.Integer, nullable=False)
+
+    carrinho = db.relationship('Carrinho', back_populates='itens')
+    produto = db.relationship('Produto')
+    cliente = db.relationship('Cliente')
+
+class Carrinho(db.Model):
+    __tablename__ = 'carrinho'
+    id = db.Column(db.Integer, primary_key=True)
+    cliente_id = db.Column(db.Integer, db.ForeignKey('cliente.id'))
+    status = db.Column(db.String, nullable=False)
+
+    itens = db.relationship('CarrinhoItem', back_populates='carrinho')
+
+class User(db.Model, UserMixin):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(20), unique=True, nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    password = db.Column(db.String(60), nullable=False)
+    role = db.Column(db.String(20), nullable=False, default='cliente')
+    cliente_id = db.Column(db.Integer, db.ForeignKey('cliente.id'))  
+    cliente = db.relationship('Cliente', back_populates='usuario', lazy=True)
+
+    def __repr__(self):
+        return f"User('{self.username}', '{self.email}', '{self.role}')"
 
 if __name__ == "__main__":
     with app.app_context():

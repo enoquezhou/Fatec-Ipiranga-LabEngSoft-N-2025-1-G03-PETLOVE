@@ -8,7 +8,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Chilanka&family=Montserrat:wght@300&display=swap" rel="stylesheet">
-    <style>
+  <style>
         :root {
             --accent-color: #DEAD6F;
             --dark-color: #222222;
@@ -25,7 +25,7 @@
         body {
             font-family: var(--body-font);
             background-color: var(--light-grey-color);
-            padding-bottom: 60px; /* Espaço para o rodapé fixo */
+            padding-bottom: 60px;
         }
 
         .bg-custom {
@@ -65,18 +65,28 @@
             margin: 0;
         }
 
-        .btn-primary, .btn-secondary {
-            background-color: var(--accent-color);
-            color: white;
+        .btn-primary,
+        .btn-secondary,
+        .btn-ver-graficos {
             font-weight: bold;
             border: none;
             padding: 15px 30px;
             font-size: 1.2rem;
-            animation: flash-text-blue 1s infinite;
+        }
+
+        .btn-primary {
+            background-color: var(--accent-color);
+            color: white;
         }
 
         .btn-secondary {
             background-color: var(--grey-color);
+        }
+
+        .btn-ver-graficos {
+            background-color: var(--primary-color);
+            color: white;
+            margin-left: 10px;
         }
 
         .text-flash-blue {
@@ -88,7 +98,7 @@
                 color: white;
             }
             50% {
-                color: var(--accent-color);
+                color: transparent;
             }
         }
 
@@ -109,13 +119,6 @@
             font-size: 0.8rem;
             padding: 14px 24px;
         }
-
-        .btn-primary {
-            background-color: var(--accent-color);
-            color: white;
-            font-weight: bold;
-            border: none;
-        }
     </style>
 </head>
 <body>
@@ -131,40 +134,39 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-5">
-                <!-- Links da barra de navegação -->
                 <li class="nav-item"><a href="{{ url_for('agendamentos') }}" class="nav-link fs-4"><i class="fas fa-calendar-alt"></i> Agendamentos</a></li>
                 <li class="nav-item"><a href="{{ url_for('clientes') }}" class="nav-link fs-4"><i class="fas fa-users"></i> Clientes</a></li>
                 <li class="nav-item"><a href="{{ url_for('pets') }}" class="nav-link fs-4"><i class="fas fa-paw"></i> Pets</a></li>
                 <li class="nav-item"><a href="{{ url_for('estoque') }}" class="nav-link fs-4"><i class="fas fa-cogs"></i> Estoque</a></li>
                 <li class="nav-item"><a href="{{ url_for('financeiro') }}" class="nav-link fs-4"><i class="fas fa-hand-holding-usd"></i> Financeiro</a></li>
             </ul>
-            <!-- Barra de Pesquisa -->
             <form class="d-flex ms-auto" onsubmit="event.preventDefault(); filterCards();" role="search">
                 <input id="searchInput" class="form-control me-2" type="search" placeholder="Pesquisar palavra/letra" aria-label="Search">
                 <button class="btn btn-outline-success" type="submit">
                     <i class="fas fa-search"></i>
                 </button>
             </form>
- <!-- Botão de Logout -->
- <ul class="navbar-nav ms-3">
-    {% if current_user.role == 'cliente' %}
-        <li class="nav-item">
-            <a class="nav-link" href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Logout Cliente</a>
-        </li>
-    {% elif current_user.role == 'prestador' %}
-        <li class="nav-item">
-            <a class="nav-link" href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Logout Prestador</a>
-        </li>
-    {% endif %}
-</ul>
-</div>
-</div>
+            <ul class="navbar-nav ms-3">
+                {% if current_user.role == 'cliente' %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Logout Cliente</a>
+                    </li>
+                {% elif current_user.role == 'prestador' %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Logout Prestador</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
 </nav>
+
 <!-- Conteúdo Principal -->
 <div id="profileContent" class="container-fluid content-container">
     <!-- Botões -->
     <div class="btn-container">
         <a href="{{ url_for('adicionar_transacao') }}" class="btn btn-primary text-flash-blue">Adicionar Transação</a>
+        <a href="{{ url_for('home_prestador') }}" class="btn btn-ver-graficos text-flash-blue">Ver Gráficos</a>
     </div>
 
     <!-- Cards para transações -->
@@ -210,7 +212,7 @@
     }
 </script>
 
-<!-- Link para o JavaScript do Bootstrap -->
+<!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>

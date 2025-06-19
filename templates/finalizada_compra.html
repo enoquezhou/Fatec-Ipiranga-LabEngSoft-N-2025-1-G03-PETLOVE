@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Meu Carrinho</title>
+    <title>Finalização da Compra</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet"/>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet"/>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chilanka&family=Montserrat:wght@300&display=swap"/>
@@ -41,9 +41,11 @@
             padding: 2% 4%;
             background-color: var(--light-primary-color);
             border-radius: 20px;
+            margin-top: 30px;
+            margin-bottom: 50px;
         }
 
-        h1, h5 {
+        h1, h2, h5 {
             color: var(--dark-color);
         }
 
@@ -52,37 +54,30 @@
             background-color: var(--light-color);
             border-radius: 10px;
             overflow: hidden;
+            margin-top: 20px;
         }
 
         table th, table td {
             padding: 12px;
             text-align: center;
             border: 1px solid var(--grey-color);
-        }
-
-        .btn-danger, .btn-success {
             font-family: var(--secondary-font);
-            font-weight: bold;
         }
 
-        .btn-danger {
-            background-color: #dc3545;
-            border: none;
+        p {
+            font-size: 1.2rem;
+            color: var(--dark-color);
+            margin-top: 20px;
+            font-family: var(--secondary-font);
         }
 
         .btn-success {
+            font-family: var(--secondary-font);
+            font-weight: bold;
             background-color: var(--accent-color);
             border: none;
-        }
-
-        .form-check-label {
-            font-size: 1.1rem;
-            color: var(--light-dark-color);
-        }
-
-        .form-check-input:checked {
-            background-color: var(--accent-color);
-            border-color: var(--accent-color);
+            padding: 10px 20px;
+            border-radius: 8px;
         }
 
         .text-center {
@@ -97,21 +92,13 @@
         .hidden {
             display: none !important;
         }
-          input[type=number]::-webkit-inner-spin-button, 
-        input[type=number]::-webkit-outer-spin-button {
-        -webkit-appearance: none;
-        margin: 0;
-    }
-
-    input[type=number] {
-    -moz-appearance: textfield; /* Firefox */
-    }
     </style>
 </head>
 <body>
+
     <nav class="navbar navbar-expand-lg bg-custom mb-4">
         <div class="container-fluid">
-            <a class="navbar-brand" href="http://127.0.0.1:5000/home_cliente">
+            <a class="navbar-brand" href="http://127.0.0.1:5000/home_prestador">
                 <img src="{{ url_for('static', filename='images/LOGO.png') }}" alt="PetLove Logo" style="height: 80px; margin-left: 70px; width: 70%"/>
                 <a style="font-size: 24px; color: #000000; text-decoration: none;">PETLOVE</a>
             </a>
@@ -161,66 +148,38 @@
         </div>
     </nav>
 
-    <div class="container mt-4 mb-5">
-        <h1 class="mb-4">Meu Carrinho</h1>
+    <div class="container">
+        <h2>Resumo da Compra</h2>
 
-        {% if carrinho_itens %}
-        <form method="POST" action="{{ url_for('meu_carrinho') }}">
-            <table class="mb-4">
-                <thead class="table-light">
-                    <tr>
-                        <th>Produto</th>
-                        <th>Quantidade</th>
-                        <th>Preço</th>
-                        <th>Total</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                {% for item in carrinho_itens %}
-                    <tr>
-                        <td>{{ item.produto.nome }}</td>
-                        <td>
-                            <input type="number"
-       name="quantidade_{{ item.id }}"
-       value="{{ item.quantidade }}"
-       min="1"
-       class="form-control quantidade-input"
-       data-preco="{{ item.produto.preco }}"
-       data-item-id="{{ item.id }}">
-                        </td>
-                        <td>R$ {{ '%.2f'|format(item.produto.preco) }}</td>
-                        <td id="total-item-{{ item.id }}">R$ {{ '%.2f'|format(item.quantidade * item.produto.preco) }}</td>
-                        <td>
-                            <a href="{{ url_for('remover_item', item_id=item.id) }}" class="btn btn-danger btn-sm">Remover</a>
-                        </td>
-                    </tr>
+        {% if itens %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Produto</th>
+                    <th>Quantidade</th>
+                    <th>Preço Unitário</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in itens %}
+                <tr>
+                    <td>{{ item.produto.nome }}</td>
+                    <td>{{ item.quantidade }}</td>
+                    <td>R$ {{ '%.2f'|format(item.produto.preco) }}</td>
+                    <td>R$ {{ '%.2f'|format(item.quantidade * item.produto.preco) }}</td>
+                </tr>
                 {% endfor %}
-                </tbody>
-            </table>
-
-            <p><strong>Total Geral:</strong> R$ <span id="total-geral">{{ '%.2f'|format(total_geral) }}</span></p>
-
-            <h5 class="mt-4">Forma de pagamento</h5>
-            <div class="form-check">
-                <input class="form-check-input" type="radio" name="forma_pagamento" id="credito" value="credito" checked>
-                <label class="form-check-label" for="credito">Cartão de Crédito</label>
-            </div>
-            <div class="form-check mb-3">
-                <input class="form-check-input" type="radio" name="forma_pagamento" id="debito" value="debito">
-                <label class="form-check-label" for="debito">Cartão de Débito</label>
-            </div>
-            <div class="form-check mb-3">
-                <input class="form-check-input" type="radio" name="forma_pagamento" id="pix" value="pix">
-                <label class="form-check-label" for="pix">Pix</label>
-            </div>
-
-            <button type="submit" class="btn btn-success">Finalizar Compra</button>
-        </form>
-
+            </tbody>
+        </table>
+        <p>Total Geral: R$ {{ '%.2f'|format(total) }}</p>
         {% else %}
-        <p class="text-center">Seu carrinho está vazio.</p>
+        <p class="text-center">Nenhum item encontrado.</p>
         {% endif %}
+
+        <div class="mt-4">
+            <a href="{{ url_for('loja') }}" class="btn btn-success">Voltar à Loja</a>
+        </div>
     </div>
 
     <footer class="bg-dark text-white text-center py-3 fixed-bottom">
@@ -241,38 +200,5 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
-    <script>
-    function atualizarTotais() {
-        let totalGeral = 0.0;
-
-        document.querySelectorAll('.quantidade-input').forEach(input => {
-            const preco = parseFloat(input.dataset.preco);
-            const itemId = input.dataset.itemId;
-            const quantidade = parseInt(input.value) || 0;
-            const total = (preco * quantidade).toFixed(2);
-
-            // Atualiza total por item
-            const totalItem = document.getElementById(`total-item-${itemId}`);
-            if (totalItem) {
-                totalItem.textContent = `R$ ${total}`;
-            }
-
-            // Soma ao total geral
-            totalGeral += preco * quantidade;
-        });
-
-        // Atualiza total geral
-        const totalGeralEl = document.getElementById('total-geral');
-        if (totalGeralEl) {
-            totalGeralEl.textContent = `R$ ${totalGeral.toFixed(2)}`;
-        }
-    }
-
-    // Aplica o listener a todos os campos de quantidade
-    document.querySelectorAll('.quantidade-input').forEach(input => {
-        input.addEventListener('input', atualizarTotais);
-    });
-</script>
-
 </body>
 </html>
